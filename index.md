@@ -17,15 +17,15 @@ Final project for my Computer Vision class which focused on generating synthetic
 
 I won first place at the Citadel Women's Datathon for my team's analysis on regional differences in the impact of gas prices depending on oil production and transit ridership. Our analysis utilized various data visualizations with Matplotlib and statistical modeling/testing to validate our conclusion.
 
-### AutoManim - TreeHacks 2024
+### [AutoManim - TreeHacks 2024](https://devpost.com/software/automanim)
 
 My project for TreeHacks, which sought to generate Manim animations (used by 3 Blue 1 Brown) given a user prompt. I used techniques inspired by Grammar Prompting for Domain-Specific Language Generation with Large Language Models by Wang et al. as well as Large Language Models are Zero-Shot Reasoners by Kojima et al. to develop a domain-specific prompt utilizing Backus Naur Form, which allowed us to obtain high performance with a total token usage 50 cents over the course of the entire hackathon. I helped create our website with the MERN stack.
 
-### RoomCraft - Web.lab Honorable Mention
+### [RoomCraft - Web.lab Honorable Mention](https://roomcraft-p861.onrender.com/)
 
 I placed in the top 7 teams out of 450+ MIT participants at the Web.lab programming class/competition for my team's website, which seeks to seamlessly combine productivity with gamification. Our website was made with React.js/HTML/CSS for the frontend, Node.js/Express/MongoDB for the backend, and ReactQuill/OpenAI API.
 
-### BioAcoustix - HackMIT
+### [BioAcoustix - HackMIT](https://devpost.com/software/bioacoustix)
 
 Our project was a platform providing bioacoustic indicators for telehealth to predict diseases from user audio recorded from a web platform. I used transfer learning from VGG16, melspectograms, Wav2Vec, HuggingFace, Librosa, Keras, Tensorflow, and sk-learn to train the AI models used at our website's backend.
 
@@ -40,11 +40,11 @@ I created an explainable visualization platform for the diagnosis and etiology o
 
 ## Indie Games
 
-### A Quark-y Tale
+### [A Quark-y Tale](https://willyue.itch.io/a-quarky-tale)
 
 A puzzle game I made in 72 hours for Winter Melon Jam about a mad scientist and her charm quarks. My team received 2nd place in the Novice category out of a total of 243 entries. 
 
-### The Collector
+### [The Collector](https://ssstudios.itch.io/the-collector)
 
 My senior project in high school, which aimed to use the medium of video games to spark curiosity about my hometown's art and architecture. Our demo transported the player to Ancient Greece where they were tasked with talking to the inhabitants of the time and solving various puzzles to retrieve the Praxiteles statue.
 
