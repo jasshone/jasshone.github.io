@@ -7,13 +7,11 @@ I went through the classic Karpathy tutorial on how to build a transformer from 
 We start by getting the input text:
 
 ```python
-
 !wget https://raw.githubusercontent.com/karpathy/char-rnn/master/data/tinyshakespeare/input.txt
 ```
 
 And then reading it using the python file reader.
 ```python
-
 with open('input.txt', 'r', encoding='utf-8') as f:
     text = f.read()
 ```
@@ -21,7 +19,6 @@ with open('input.txt', 'r', encoding='utf-8') as f:
 Then, the next step is to encode the text input into numbers. The way that this is handled in this particular tutorial is very straightforward: just getting a set of all chars in the text and sorting them. The vocab size is the number of these unique characters.
 
 ```python
-
 chars = sorted(list(set(text)))
 vocab_size = len(chars)
 ```
@@ -32,6 +29,7 @@ Then, we number each of these unique chars from 0 to `vocab_size`, and create a 
 
 stoi = {ch:i for i,ch in enumerate(chars)}
 itos = {i:ch for i,ch in enumerate(chars)}
+
 ```
 
 Encoding and decoding becomes equal to splitting the characters into a list and converting them to the integer equivalent for encoding and joining the corresponding chars back together for decoding.
@@ -50,6 +48,7 @@ After converting the data to a list of numbers, we split it into training and va
 n = int(0.9*len(data))
 train_data = data[:n]
 val_data = data[n:]
+
 ```
 
 For sequence-based data, the training method is a bit different from traditional input-output pairs. Essentially, the way that training works is that for a given chunk of data with size `block_size`, for `i` from 0 to `block_size`, we take the first `i` inputs to be the context and try to predict the `i+1`th input from that. This is illustrated clearly by this code snippet:
@@ -258,5 +257,58 @@ torch.allclose(xbow, xbow3) #returns True
 
 What is interesting about softmax is that softmax enables us to weight each token in the averaging differently (using values that are not necessarily 0), essentially creating a weighted average. In other words, tokens can find specific other tokens "more interesting" rather than finding all parts of the past input "equally interesting."
 
+
+#### Adding Linear Layer + Positional Encoding to Our Model
+
+First, we add a linear layer to process the embeddings from the embedding table, which adds a bit more complexity to our model. Then, we also add position information about each token since position now matters in our model. This is accomplished through a position embedding table which is similar to the token embedding table we previously used.
+
+```python
+
+class BigramLanguageModel(nn.Module):
+    def __init__(self, vocab_size):
+        super().__init__()
+        #lookup table
+        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+        self.position_embedding_table = nn.Embedding(block_size, n_embd) #there are block_size possible values for the position of a token
+        self.lm_head = nn.Linear(n_embd, vocab_size) #new linear layer
+    def forward(self, idx, targets):
+        '''
+        idx and targets are the input and target blocks
+        respectively that we get from the dataloader
+        '''
+    
+        tok_emb = self.token_embedding_table(idx)
+        #encodes the position of each token using the position embedding table
+        pos_emb = self.position_embedding_table(torch.arange(T, device = device)) #(T,C)
+        x = tok_emb+pos_emb
+        logits = self.lm_head(x) #pass through linear layer first
+        #before computing loss
+        #(B, T, C) because idx is B,T and for each input char
+        #we get the corresponding logits for each of the C possible chars
+        #in our vocabulary
+        B,T,C = logits.shape
+
+        #reshape the logits/targets to what torch expects for cross entropy
+        logits = logits.view(B*T, C)
+        targets = targets.view(B*T)
+        #calculate the cross entropy loss
+        loss = F.cross_entropy(logits, targets)
+        return logits, loss
+    def generate(self, idx, max_new_tokens):
+        #generate a maximum of `max_new_tokens`
+        for _ in range(max_new_tokens):
+            #get predictions for current block
+            logits, loss = self(idx)
+            #get only the last time step because we want to add onto that
+            logits = logits[:, -1, :]
+            #get the probabilities of each possible char in the vocab
+            probs = F.softmax(logits, dim = -1)
+            #sample from that distribution to get the char we generate
+            idx_next = torch.multinomial(probs, num_samples = 1)
+            #append the index to the sequence so we can build onto it
+            idx = torch.cat((idx, idx_next), dim = 1)
+        return idx
+```
+### Version 4: Self-attention!!
 
 
