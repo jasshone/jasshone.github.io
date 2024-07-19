@@ -5,7 +5,7 @@ I have experience building projects in Computer Vision, NLP, medical ML, deep le
 
 ## Projects
 
-### Royr: generalizable imitation learning with robot memory and object-based priors. IN PROGRESS
+### Royr: generalizable imitation learning with robot memory and object-based priors. (In Progress)
 
 We aim to use object-based methods to improve imitation learning to address challenges in learning from real-world data such as different camera viewpoints, object task relevance, background changes, and occlusion. My contribution so far has focused on extracting semantic/spatial features from foundation models (CLIP and DINO v2) using feature pyramid networks and different methods to combine the features (such as an MLP), as well as converting a scene to an object-based input space. 
 
