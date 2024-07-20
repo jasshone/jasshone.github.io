@@ -318,11 +318,11 @@ The way that we do this is as follows:
 
 1. Every token at each position will emit two vectors: a query and a key. The query is roughly "what am I looking for", and the key vector is roughly "what do I contain".
 2. To compute affinities between tokens in a sequence, we can simply take the dot product of the keys and queries. For one token, that would be the token's query dot product with all of the keys of the other tokens in the sequence.
-3. If a key and a query are aligned, then the dot product will be high, which will make the model learn more from this specific token when predicting the target.
+3. If a key and a query are aligned, then the dot product will be high, which will make the head learn more from this specific token when predicting the target.
 4. We take this matrix which is the result of the dot product, remove tokens which are in the future of the current token, and then softmax the result to convert the logits to probabilities
 5. Then, we convert the input to a value vector, which takes the input and adds another layer of filtering/complexity to better convey the useful information the head found from this input, and multiply it by the resulting matrix in the 4th step.
 
-To illustrate how keys and queries work, suppose we have a vocab of "a", "b", "c", "d", "e", "f" and the number of dimensions in the key/query vectors (or `head_size`) is 3. Say that "a" has the query vector of <2, 1, 0>, "b" has the key vector of <1, 2, 0>, and "c" has the key vector of <0,0,1>. By multiplying the query by the keys, we find that we should "pay attention" to "b" more than "c" when the last token in the sequence is "a". 
+To illustrate how keys and queries work, suppose we have a vocab of "a", "b", "c", "d", "e", "f" and the number of dimensions in the key/query vectors (or `head_size`) is 3. Say that "a" has the query vector of <2, 1, 0>, "b" has the key vector of <1, 2, 0>, and "c" has the key vector of <0,0,1>. By multiplying the query by the keys, we find that the head should "pay attention" to "b" more than "c" when the last token in the sequence is "a". 
 
 Here is the implementation of a single head of self-attention:
 
