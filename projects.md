@@ -2,11 +2,6 @@
 
 Here's a list and short description of some of my past projects. 
 
-
-
-
-## AI/ML, Web Dev, Data Science
-
 ### Royr: generalizable imitation learning with robot memory and object-based priors. (In Progress)
 
 We aim to use object-based methods to improve imitation learning to address challenges in learning from real-world data such as different camera viewpoints, object task relevance, background changes, and occlusion. My contribution so far has focused on extracting semantic/spatial features from foundation models (CLIP and DINO v2) using feature pyramid networks and different methods to combine the features (such as an MLP), as well as converting a scene to an object-based input space. 
@@ -39,17 +34,3 @@ My project for Regeneron STS that placed in the top 300 in the US, which focused
 
 I created an explainable visualization platform for the diagnosis and etiology of dyspnea (shortness-of-breath). I utilized various feature selection techniques, data processing/imputation, bayesian statistics, and various ML models using sci-kit learn. My research found significant differences in the risk factors/models for patients of differential gender, age, and BMI.
 
-
-## Indie Games
-
-### [A Quark-y Tale](https://willyue.itch.io/a-quarky-tale)
-
-A puzzle game I made in 72 hours for Winter Melon Jam about a mad scientist and her charm quarks. My team received 2nd place in the Novice category out of a total of 243 entries. 
-
-### [The Collector](https://ssstudios.itch.io/the-collector)
-
-My senior project in high school, which aimed to use the medium of video games to spark curiosity about my hometown's art and architecture. Our demo transported the player to Ancient Greece where they were tasked with talking to the inhabitants of the time and solving various puzzles to retrieve the Praxiteles statue.
-
-### Pairdle
-
-Created at PAIR 2023 in under 12 hours. The premise of the game is that two players attempt to converge upon the same word/Schelling Point given only information about the semantic similarity of their previous guesses.
