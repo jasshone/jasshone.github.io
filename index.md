@@ -5,8 +5,8 @@
   <div id = "info">
   <h1>Jasmine Shone</h1>
   <br/>
-  <h2>Undergraduate Student, MIT</h2>
-  <h2>Email: Jasmine [at] mit [dot] edu</h2>
+  <h3>Undergraduate Student, MIT</h3>
+  <h3>Email: Jasmine [at] mit [dot] edu</h3>
   </div>
   
 </div>
