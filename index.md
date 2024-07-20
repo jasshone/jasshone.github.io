@@ -1,10 +1,10 @@
 <div id = "intro" >
 <img width="50%" alt="image" src="https://github.com/user-attachments/assets/82652a4d-2272-40b2-988e-cecb35d9b273">
   <div>
-  Jasmine Shone
-  
+  <h1>Jasmine Shone</h1>
+  <br/>
   Undergraduate Student, MIT
-  
+  <br/>
   Email: Jasmine [at] mit [dot] edu
   </div>
   
