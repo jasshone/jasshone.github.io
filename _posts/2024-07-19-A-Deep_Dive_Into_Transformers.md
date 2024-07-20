@@ -413,11 +413,7 @@ class BigramLanguageModel(nn.Module):
         #feed token embeddings and position embeddings through self-attention head
         x= self.sa_head(x)
 
-        logits = self.lm_head(x) #pass through linear layer first
-        #before computing loss
-        #(B, T, C) because idx is B,T and for each input char
-        #we get the corresponding logits for each of the C possible chars
-        #in our vocabulary
+        logits = self.lm_head(x)
         B,T,C = logits.shape
 
         #reshape the logits/targets to what torch expects for cross entropy
