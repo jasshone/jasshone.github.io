@@ -159,7 +159,7 @@ To get a generated output we just combine the decode function we coded before wi
 ```python
 print(decode(m.generate(idx = torch.zeros((1,1), dtype = torch.log), max_new_tokens = 500)[0].tolist()))
 ```
-This will print out the generated text, which is not too good at this stage. 
+This will print out the generated text, which is not too good at this stage (2.5).
 
 That's all for the Bigram Model section! (37:49 in the video)
 
@@ -362,7 +362,7 @@ There's also a difference between what we implemented, which is a self-attention
 
 Another important step that we didn't add that is in the original "Attention is All You Need" paper is scaling the result of Q @ K.T down by `sqrt(head_size)`. This is because if the key and query matrices are unit gaussian, then because the dimension is `head_size`, the variance will also be on the order of `head_size`. Since the result of Q @ K.T will be fed into softmax, it should be fairly diffuse because otherwise when faced with extreme values, softmax will converge to one-hot vectors (which limits the information each node gets to down to basically one other node).
 
-### Implementing an Attention Head
+#### Implementing an Attention Head
 
 Now, we take what we learned about attention and convert it to an actual `Head` class. Note that the code is essentially the exact same as the attention code just with small changes to create a key, query, and value matrix for the specific head and allow the head to reuse the tril matrix.
 
@@ -443,6 +443,381 @@ Now, we can train the model. A couple changes to the hyperparameters:
 1. learning rate decrease to 1e-3 (self-attention can't tolerate high learning rates)
 2. increased iterations because learning rate is lower
 
-The loss slightly decreased from these changes. 
+The loss slightly decreases from adding the head (2.4).
 
 That was a very long section, but luckily we are now done. (1:21:58 in the video)
+
+### Multi-headed Self-attention
+
+<img width="178" alt="image" src="https://github.com/user-attachments/assets/5b016719-0a47-4383-88de-d9ffeb65e650">
+
+We previously implemented a single attention head; multi-head self-attention is having multiple of these heads, and concatenating then aggregating their results. 
+
+Implementing a class for multi-head attention is thus pretty straightforward.
+
+```python
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, num_heads, head_size):
+        super().__init__()
+
+        #generating a modulelist of `num_heads` heads
+        self.heads = nn.ModuleList([Head(head_size) for i in range(num_heads)])
+    def forward(self, x, targets):
+        #run the input through each head and concatenate
+        return torch.cat([h(x) for h in self.heads], dim = -1)
+
+```
+
+Then, we update our language model code to use multi-headed attention. One note is that because there are now `n` heads running in parallel, the `head_size` of each will correspondingly be smaller to get the same shape we got before of the output vector.
+
+
+```python
+
+class BigramLanguageModel(nn.Module):
+    def __init__(self, vocab_size):
+        super().__init__()
+        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+        self.position_embedding_table = nn.Embedding(block_size, n_embd)
+
+        #adding a multi-headed self attention
+        self.sa_heads = MultiHeadAttention(4, n_embd//4) # 4 heads of 8-dimensional self-attention, same output vector dimension as before which is `n_embd`
+        self.lm_head = nn.Linear(n_embd, vocab_size) #new linear layer
+
+        
+    def forward(self, idx, targets):
+    
+        tok_emb = self.token_embedding_table(idx)
+        pos_emb = self.position_embedding_table(torch.arange(T, device = device)) #(T,C)
+        x = tok_emb+pos_emb
+
+        #feed token embeddings and position embeddings through multi-headed self-attention
+        x= self.sa_heads(x)
+
+        logits = self.lm_head(x)
+        B,T,C = logits.shape
+
+        #reshape the logits/targets to what torch expects for cross entropy
+        logits = logits.view(B*T, C)
+        targets = targets.view(B*T)
+        #calculate the cross entropy loss
+        loss = F.cross_entropy(logits, targets)
+        return logits, loss
+
+    def generate(self, idx, max_new_tokens):
+        #generate a maximum of `max_new_tokens`
+        for _ in range(max_new_tokens):
+            #crop idx to last block_size tokens to prevent going out of scope
+            idx_cond = idx[:, -block_size:]
+
+            
+            logits, loss = self(idx)
+            logits = logits[:, -1, :]
+            probs = F.softmax(logits, dim = -1)
+            idx_next = torch.multinomial(probs, num_samples = 1)
+            idx = torch.cat((idx, idx_next), dim = 1)
+        return idx
+```
+
+By training this new model, the loss reduces a bit more (2.28).
+
+The intuition about the reduced loss is that it helps to have more communication channels between the tokens so more information can be paid attention to and learned from. With that, multiheaded self-attention is complete. (1:24:15 in the video)
+
+
+### Feedforward layers
+
+Previously, the model went straight from multi-headed self attention to logits. This meant that the tokens did not have much time to "think on" what they found from the other tokens. To solve this, we add a small feedforward layer with a nonlinearity to allow for this "thinking" to occur. Essentially, self-attention allows for communication between tokens, and once the communication/data gathering has occurred, now the tokens "think" on that data independently.
+
+```python
+class FeedForward(nn.Module):
+    def __init__(self, n_embd):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(n_embd, n_embd),
+            nn.ReLU(),
+        )
+    def forward(self, x):
+        return self.net(x)
+```
+
+We pass the output from the multi-headed self-attention through a feedforward layer before computing the logits.
+
+
+```python
+
+class BigramLanguageModel(nn.Module):
+    def __init__(self, vocab_size):
+        super().__init__()
+        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+        self.position_embedding_table = nn.Embedding(block_size, n_embd)
+        self.sa_heads = MultiHeadAttention(4, n_embd//4)
+
+        #add feedforward layer
+        self.ffwd = FeedForward(n_embd)
+
+        self.lm_head = nn.Linear(n_embd, vocab_size) #new linear layer
+
+        
+    def forward(self, idx, targets):
+    
+        tok_emb = self.token_embedding_table(idx)
+        pos_emb = self.position_embedding_table(torch.arange(T, device = device)) #(T,C)
+        x = tok_emb+pos_emb
+        x = self.sa_heads(x)
+
+        #feed the output of the multi-headed self attention through the feedforward layer
+        x = self.ffwd(x)
+
+        logits = self.lm_head(x)
+        B,T,C = logits.shape
+
+        #reshape the logits/targets to what torch expects for cross entropy
+        logits = logits.view(B*T, C)
+        targets = targets.view(B*T)
+        #calculate the cross entropy loss
+        loss = F.cross_entropy(logits, targets)
+        return logits, loss
+
+    def generate(self, idx, max_new_tokens):
+        #generate a maximum of `max_new_tokens`
+        for _ in range(max_new_tokens):
+            #crop idx to last block_size tokens to prevent going out of scope
+            idx_cond = idx[:, -block_size:]
+
+            
+            logits, loss = self(idx)
+            logits = logits[:, -1, :]
+            probs = F.softmax(logits, dim = -1)
+            idx_next = torch.multinomial(probs, num_samples = 1)
+            idx = torch.cat((idx, idx_next), dim = 1)
+        return idx
+```
+
+This addition decreases loss slightly to 2.24. 
+
+### Blocks
+
+Now, what we want is to stack this component of self-attention, feedforward in sequence to allow for the model to do even more "thinking". To do this, we implement a `Block` class which consists precisely of a multi-headed attention and a feedforward layer.
+
+```python
+class Block(nn.Module):
+    def __init__(self, n_embd, n_head):
+        super().__init__()
+        #calculate size of heads by the restriction that we want the final
+        #concatenated embedding from all the heads to have C = n_embd
+        head_size = n_embd//n_head
+
+        #initialize multi-headed attention + feedforward 
+        self.sa = MultiHeadAttention(n_head, head_size)
+        self.ffwd = FeedForward(n_embd)
+    def forward(self, x):
+        x = self.sa(x)
+        x = self.ffwd(x)
+        return x
+```
+
+Now, we want to use several blocks within our network instead of just one.
+
+```python
+
+class BigramLanguageModel(nn.Module):
+    def __init__(self, vocab_size):
+        super().__init__()
+        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+        self.position_embedding_table = nn.Embedding(block_size, n_embd)
+
+        #add the blocks to the model
+        self.blocks = nn.Sequential(
+            Block(n_embd, n_head = 4),
+            Block(n_embd, n_head = 4),
+            Block(n_embd, n_head = 4),
+        )
+
+        self.lm_head = nn.Linear(n_embd, vocab_size) #new linear layer
+
+        
+    def forward(self, idx, targets):
+    
+        tok_emb = self.token_embedding_table(idx)
+        pos_emb = self.position_embedding_table(torch.arange(T, device = device)) #(T,C)
+        x = tok_emb+pos_emb
+
+        #pass x through the blocks
+        x = self.blocks(x)
+
+        logits = self.lm_head(x)
+        B,T,C = logits.shape
+
+        #reshape the logits/targets to what torch expects for cross entropy
+        logits = logits.view(B*T, C)
+        targets = targets.view(B*T)
+        #calculate the cross entropy loss
+        loss = F.cross_entropy(logits, targets)
+        return logits, loss
+
+    def generate(self, idx, max_new_tokens):
+        #generate a maximum of `max_new_tokens`
+        for _ in range(max_new_tokens):
+            #crop idx to last block_size tokens to prevent going out of scope
+            idx_cond = idx[:, -block_size:]
+
+            
+            logits, loss = self(idx)
+            logits = logits[:, -1, :]
+            probs = F.softmax(logits, dim = -1)
+            idx_next = torch.multinomial(probs, num_samples = 1)
+            idx = torch.cat((idx, idx_next), dim = 1)
+        return idx
+```
+
+
+### Optimizations
+
+At this point, because the neural net is starting to become pretty deep, there's some optimization issues which arise which leads performance to suffer. To solve these issues, there are two optimizations that dramatically help with the depth of the network and making it sure it remains optimizable.
+
+#### 1. Residual Connections
+
+The first optimization is adding residual/skip connections between nodes. The way that these work is that you take the input, pass it through the block, then add the original input to the result.
+
+<img width="236" alt="image" src="https://github.com/user-attachments/assets/ed441789-ae33-45bb-a6fa-e056d93aacee">
+
+You can think of it as a residual pathway for which there's a branch off of it which performs some computation, and then is combined back into the pathway by addition. In the beginning of training, this basically allows the gradients from the supervision to directly propogate back to early layers, and the intermediate blocks only kick in over time. 
+
+Implementing these connections are relatively simple within the Block class:
+
+```python
+class Block(nn.Module):
+    def __init__(self, n_embd, n_head):
+        super().__init__()
+        head_size = n_embd//n_head
+        self.sa = MultiHeadAttention(n_head, head_size)
+        self.ffwd = FeedForward(n_embd)
+
+    def forward(self, x):
+        #add residual connection
+        x = x+ self.sa(x)
+
+        #add residual connection
+        x = x+ self.ffwd(x)
+        return x
+```
+
+Additionally, we introduce a projection layer within both the `MultiHeadAttention` class and FeedForward class to "project" the outputs of each back to the residual pathway.
+
+```python
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, num_heads, head_size):
+        super().__init__()
+        self.heads = nn.ModuleList([Head(head_size) for i in range(num_heads)])
+
+        #add projection layer
+        self.proj = nn.Linear(n_embd, n_embd)
+    def forward(self, x, targets):
+        out = torch.cat([h(x) for h in self.heads], dim = -1)
+        #project output
+        out = self.proj(out)
+        return out
+```
+
+```python
+class FeedForward(nn.Module):
+    def __init__(self, n_embd):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(n_embd, n_embd),
+            nn.ReLU(),
+            nn.Linear(n_embd, n_embd), #add projection layer
+        )
+    def forward(self, x):
+        return self.net(x)
+```
+
+##### Position-wise Feed-Forward Networks
+Within the original Attention is All You Need paper, the channel size of the inner layer of the feed-forward network is multiplied by 4. This change looks like the following:
+
+```python
+class FeedForward(nn.Module):
+    def __init__(self, n_embd):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(n_embd, 4* n_embd), #scale up by 4
+            nn.ReLU(),
+            nn.Linear(4* n_embd, n_embd), #scale down 
+        )
+    def forward(self, x):
+        return self.net(x)
+```
+The loss further decreases after training this model (2.08). However, at this network size, we are starting to see some overfitting (train loss < val loss).
+
+
+### 2. Layernorm
+
+A related concept, Batchnorm, basically makes sure that across the batch dimension, the outputs of neurons are unit gaussian (0 mean, 1 std). Layernorm is the same thing except instead of normalizing the columns of the output we normalize the rows. For each individual example, the outputs will now be normalized.
+
+Contrary to the original paper, it is now more common to apply layernorm before multi-head attention is done.
+
+```python
+class Block(nn.Module):
+    def __init__(self, n_embd, n_head):
+        super().__init__()
+        head_size = n_embd//n_head
+        self.sa = MultiHeadAttention(n_head, head_size)
+        self.ffwd = FeedForward(n_embd)
+        #initialize layernorms
+        self.ln1 = nn.LayerNorm(n_embd)
+        self.ln2 = nn.LayerNorm(n_embd)
+
+    def forward(self, x):
+        x = x+ self.sa(self.ln1(x)) #apply layernorms before feeding x into the attention heads
+
+        x = x+ self.ffwd(self.ln2(x))
+        return x
+```
+
+We also add a layernorm after the blocks in the language model:
+
+```python
+
+class BigramLanguageModel(nn.Module):
+    def __init__(self, vocab_size):
+        super().__init__()
+        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+        self.position_embedding_table = nn.Embedding(block_size, n_embd)
+        #add layernorm
+        self.blocks = nn.Sequential(
+            Block(n_embd, n_head = 4),
+            Block(n_embd, n_head = 4),
+            Block(n_embd, n_head = 4),
+            nn.LayerNorm(n_embd),
+        )
+        self.lm_head = nn.Linear(n_embd, vocab_size) #new linear layer
+
+        
+    def forward(self, idx, targets):
+    
+        tok_emb = self.token_embedding_table(idx)
+        pos_emb = self.position_embedding_table(torch.arange(T, device = device)) #(T,C)
+        x = tok_emb+pos_emb
+        x = self.blocks(x)
+        logits = self.lm_head(x)
+        B,T,C = logits.shape
+        logits = logits.view(B*T, C)
+        targets = targets.view(B*T)
+        loss = F.cross_entropy(logits, targets)
+        return logits, loss
+
+    def generate(self, idx, max_new_tokens):
+        for _ in range(max_new_tokens):
+            idx_cond = idx[:, -block_size:]
+            logits, loss = self(idx)
+            logits = logits[:, -1, :]
+            probs = F.softmax(logits, dim = -1)
+            idx_next = torch.multinomial(probs, num_samples = 1)
+            idx = torch.cat((idx, idx_next), dim = 1)
+        return idx
+```
+
+
+There is again a slight improvement in loss by adding the LayerNorms (2.08). With that, we move on the final part of the tutorial, scaling up the model! (1:37:42 in the video)
+
