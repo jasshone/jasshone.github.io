@@ -973,4 +973,4 @@ Then, the second step is to have different raters rank responses in order of pre
 
 These fine-tuning steps move the model from a document completer to a question-answerer. 
 
-That is the end of the tutorial, and this article. Hope this explanation made sense and you learned something; I certainly did while writing it!
+That is the end of the tutorial, and this article. You can find my implementation of the transformer in this blog [here](https://github.com/jasshone/GPT). Hope this explanation made sense and you learned something; I certainly did while writing it!
