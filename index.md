@@ -3,9 +3,9 @@
   <div>
   <h1>Jasmine Shone</h1>
   <br/>
-  Undergraduate Student, MIT
+  <h2>Undergraduate Student, MIT</h2>
   <br/>
-  Email: Jasmine [at] mit [dot] edu
+  <h2>Email: Jasmine [at] mit [dot] edu</h2>
   </div>
   
 </div>
