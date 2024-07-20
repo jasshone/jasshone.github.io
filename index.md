@@ -1,4 +1,4 @@
-<img width="70%" alt="image" src="https://github.com/user-attachments/assets/82652a4d-2272-40b2-988e-cecb35d9b273">
+<img width="50%" alt="image" src="https://github.com/user-attachments/assets/82652a4d-2272-40b2-988e-cecb35d9b273">
 
 
 Hi! I'm Jasmine Shone, a current student at MIT. This summer, I am a research intern at the Learning and Intelligent Systems lab at MIT under Professor Kaelbling and Professor Lozano-Perez, working on robots that are better able to transfer knowledge from training data to real-world environments. 
