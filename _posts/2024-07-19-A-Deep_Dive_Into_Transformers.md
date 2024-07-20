@@ -362,5 +362,95 @@ There's also a difference between what we implemented, which is a self-attention
 
 Another important step that we didn't add that is in the original "Attention is All You Need" paper is scaling the result of Q @ K.T down by `sqrt(head_size)`. This is because if the key and query matrices are unit gaussian, then because the dimension is `head_size`, the variance will also be on the order of `head_size`. Since the result of Q @ K.T will be fed into softmax, it should be fairly diffuse because otherwise when faced with extreme values, softmax will converge to one-hot vectors (which limits the information each node gets to down to basically one other node).
 
+### Implementing an Attention Head
 
+Now, we take what we learned about attention and convert it to an actual `Head` class. Note that the code is essentially the exact same as the attention code just with small changes to create a key, query, and value matrix for the specific head and allow the head to reuse the tril matrix.
 
+```python
+
+class Head(nn.Module):
+    def __init__(self, head_size):
+        super().__init__()
+        self.key = nn.Linear(vocab_size, head_size, bias = False)
+        self.query = nn.Linear(vocab_size, head_size, bias = False)
+        self.value = nn.Linear(vocab_size, head_size, bias = False)
+        self.register_buffer('tril', torch.tril(torch.ones(block_size,block_size)))
+
+    def forward(self, x, targets):
+        '''
+        idx and targets are the input and target blocks
+        respectively that we get from the dataloader
+        '''
+        B, T, C = x.shape
+        k = self.key(idx)
+        q = self.query(idx)
+        v = self.value(idx)
+        wei = q @ k.transpose(-2, -1) * C**-0.5
+
+        wei = wei.masked_fill(self.tril[:T,:T] == 0, float('-inf'))
+        wei = F.softmax(wei, dim = -1)
+        out = wei @ v
+        return out
+
+```
+
+Now, all we need to do is integrate this head into the language model class.
+
+```python
+
+class BigramLanguageModel(nn.Module):
+    def __init__(self, vocab_size):
+        super().__init__()
+        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+        self.position_embedding_table = nn.Embedding(block_size, n_embd) 
+        #adding a self attention head
+        self.sa_head = Head(n_embd)
+        self.lm_head = nn.Linear(n_embd, vocab_size) #new linear layer
+
+        
+    def forward(self, idx, targets):
+    
+        tok_emb = self.token_embedding_table(idx)
+        pos_emb = self.position_embedding_table(torch.arange(T, device = device)) #(T,C)
+        x = tok_emb+pos_emb
+
+        #feed token embeddings and position embeddings through self-attention head
+        x= self.sa_head(x)
+
+        logits = self.lm_head(x) #pass through linear layer first
+        #before computing loss
+        #(B, T, C) because idx is B,T and for each input char
+        #we get the corresponding logits for each of the C possible chars
+        #in our vocabulary
+        B,T,C = logits.shape
+
+        #reshape the logits/targets to what torch expects for cross entropy
+        logits = logits.view(B*T, C)
+        targets = targets.view(B*T)
+        #calculate the cross entropy loss
+        loss = F.cross_entropy(logits, targets)
+        return logits, loss
+
+    def generate(self, idx, max_new_tokens):
+        #generate a maximum of `max_new_tokens`
+        for _ in range(max_new_tokens):
+            #crop idx to last block_size tokens to prevent going out of scope
+            idx_cond = idx[:, -block_size:]
+
+            
+            logits, loss = self(idx)
+            logits = logits[:, -1, :]
+            probs = F.softmax(logits, dim = -1)
+            idx_next = torch.multinomial(probs, num_samples = 1)
+            idx = torch.cat((idx, idx_next), dim = 1)
+        return idx
+```
+
+Now, we can train the model. A couple changes to the hyperparameters:
+
+1. learning rate decrease to 1e-3 (self-attention can't tolerate high learning rates)
+2. increased iterations because learning rate is lower
+
+The loss slightly decreased from these changes. 
+
+That was a very long section, but luckily we are now done. (1:21:58 in the video)
