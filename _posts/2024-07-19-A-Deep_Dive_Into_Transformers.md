@@ -969,7 +969,7 @@ Our pretraining step was done on a transformer with 10M parameters, on a dataset
 
 After pretraining, the next stage is to align the model to be an assistant/create outputs corresponding to prompts. This is done by first collecting thousands of question-answer pairs and train the model to expect a question and an answer pair.
 
-Then, the second step is to have differnt raters rank responses in order of preference to train a reward model to predict the desirability of each response. The third step is to optimize the policy gradient using the PPO RL optimizer to fine tune the answer policy to score a high reward according to the reward model.
+Then, the second step is to have different raters rank responses in order of preference to train a reward model to predict the desirability of each response. The third step is to optimize the policy gradient using the PPO RL optimizer to fine tune the answer policy to score a high reward according to the reward model.
 
 These fine-tuning steps move the model from a document completer to a question-answerer. 
 
