@@ -1,4 +1,4 @@
-# Some things I've done for fun
+# Fun
 
 
 ## Indie Games
