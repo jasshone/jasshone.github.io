@@ -1,10 +1,11 @@
 <div id = "intro" >
+  <div id = "profile">
 <img width="40%" height = "40%" alt="image" src="https://github.com/user-attachments/assets/82652a4d-2272-40b2-988e-cecb35d9b273">
-  <div>
+    </div>
+  <div id = "info">
   <h1>Jasmine Shone</h1>
   <br/>
   <h2>Undergraduate Student, MIT</h2>
-  <br/>
   <h2>Email: Jasmine [at] mit [dot] edu</h2>
   </div>
   
