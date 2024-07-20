@@ -1,6 +1,6 @@
 <div id = "intro" >
   <div id = "profile">
-<img width="70%"  alt="image" src="https://github.com/user-attachments/assets/82652a4d-2272-40b2-988e-cecb35d9b273">
+<img width="90%"  alt="image" src="https://github.com/user-attachments/assets/82652a4d-2272-40b2-988e-cecb35d9b273">
     </div>
   <div id = "info">
   <h1>Jasmine Shone</h1>
