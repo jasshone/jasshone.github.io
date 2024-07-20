@@ -1,5 +1,5 @@
 <div id = "intro" >
-<img width="50%" alt="image" src="https://github.com/user-attachments/assets/82652a4d-2272-40b2-988e-cecb35d9b273">
+<img width="40%" height = "40%" alt="image" src="https://github.com/user-attachments/assets/82652a4d-2272-40b2-988e-cecb35d9b273">
   <div>
   <h1>Jasmine Shone</h1>
   <br/>
