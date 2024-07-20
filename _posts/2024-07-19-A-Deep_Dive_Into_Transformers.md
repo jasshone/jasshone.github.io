@@ -821,3 +821,147 @@ class BigramLanguageModel(nn.Module):
 
 There is again a slight improvement in loss by adding the LayerNorms (2.08). With that, we move on the final part of the tutorial, scaling up the model! (1:37:42 in the video)
 
+### Scaling Up the Model
+We have basically all of the pieces in place at this point; now it's just cleaning up the code to allow for creating larger models.
+
+Here's what the language model class looks like now:
+
+
+```python
+
+class BigramLanguageModel(nn.Module):
+    def __init__(self, vocab_size):
+        super().__init__()
+        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+        self.position_embedding_table = nn.Embedding(block_size, n_embd)
+
+        #make number of blocks and number of heads variable
+        self.blocks = nn.Sequential(*[Block(n_embd, n_head = n_head) for _ in range(n_layer)])
+
+        self.ln_f = nn.LayerNorm(n_embd) # final layer norm
+
+        self.lm_head = nn.Linear(n_embd, vocab_size) 
+
+        
+    def forward(self, idx, targets):
+    
+        tok_emb = self.token_embedding_table(idx)
+        pos_emb = self.position_embedding_table(torch.arange(T, device = device)) #(T,C)
+        x = tok_emb+pos_emb
+        x = self.blocks(x)
+        x = self.ln_f(x) #pass x through layernorm
+        logits = self.lm_head(x)
+        B,T,C = logits.shape
+        logits = logits.view(B*T, C)
+        targets = targets.view(B*T)
+        loss = F.cross_entropy(logits, targets)
+        return logits, loss
+
+    def generate(self, idx, max_new_tokens):
+        for _ in range(max_new_tokens):
+            idx_cond = idx[:, -block_size:]
+            logits, loss = self(idx)
+            logits = logits[:, -1, :]
+            probs = F.softmax(logits, dim = -1)
+            idx_next = torch.multinomial(probs, num_samples = 1)
+            idx = torch.cat((idx, idx_next), dim = 1)
+        return idx
+```
+
+We also add dropout right before any connection back into the residual pathway. The intuition behind using dropout is that by shutting off connections between nodes randomly, we essentially train a bunch of small, partial networks, and at test time when all of the nodes are switched on, we merge these networks into a single ensemble, which improves performance. We make this addition in the following components:
+
+```python
+class FeedForward(nn.Module):
+    def __init__(self, n_embd):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(n_embd, n_embd),
+            nn.ReLU(),
+            nn.Linear(n_embd, n_embd)
+            nn.Dropout(dropout) #add dropout
+        )
+    def forward(self, x):
+        return self.net(x)
+```
+
+```python
+
+class MultiHeadAttention(nn.Module):
+    def __init__(self, num_heads, head_size):
+        super().__init__()
+        self.heads = nn.ModuleList([Head(head_size) for i in range(num_heads)])
+        self.proj = nn.Linear(n_embd, n_embd)
+
+        #add dropout
+        self.dropout = nn.Dropout(dropout)
+    def forward(self, x, targets):
+        out = torch.cat([h(x) for h in self.heads], dim = -1)
+        #add dropout
+        out = self.dropout(self.proj(out))
+        return out
+```
+
+```python
+
+class Head(nn.Module):
+    def __init__(self, head_size):
+        super().__init__()
+        self.key = nn.Linear(vocab_size, head_size, bias = False)
+        self.query = nn.Linear(vocab_size, head_size, bias = False)
+        self.value = nn.Linear(vocab_size, head_size, bias = False)
+        self.register_buffer('tril', torch.tril(torch.ones(block_size,block_size)))
+
+        #add dropout
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x, targets):
+        B, T, C = x.shape
+        k = self.key(idx)
+        q = self.query(idx)
+        v = self.value(idx)
+        wei = q @ k.transpose(-2, -1) * C**-0.5
+
+        wei = wei.masked_fill(self.tril[:T,:T] == 0, float('-inf'))
+        wei = F.softmax(wei, dim = -1)
+
+        #apply dropout to randomly prevent some nodes from communicating
+        wei = self.dropout(wei)
+
+        out = wei @ v
+        return out
+
+```
+
+The following are the list of hyperparameters used for training this larger neural net:
+
+```python
+batch_size = 64
+block_size = 256
+max_iters = 5000
+eval_interval = 500
+learning_rate = 3e-4
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+eval_iters = 200
+n_embd = 384
+n_head = 6 #each head is 64 dimensional
+n_layer = 6
+dropout = 0.2
+```
+
+The loss decreases again from this model quite substantially (1.49) and the output is much more similar to english. Now, the coding portion is complete! (1:42:30 in the video)
+
+### Conclusions + Where to Go from Here
+
+What we implemented was a decoder-only transformer, which is usually what the pretraining step of language models are. This is when the model learns to "babble text" on and on, which is what we get in the "generate" function of our model. 
+
+For language models like GPT, there is an extra portion of the model called the encoder which essentially learns to encode the prompt that is fed into these language models to get a relevant output (such as within a translation task). For these models, there is an extra connection from the outputs of the encoder to the decoder through a cross attention (queries from decoder block, keys and values coming from the last encoder block).
+
+Our pretraining step was done on a transformer with 10M parameters, on a dataset with 1 million tokens (around 300,000 tokens using the OpenAI encoding scheme which uses subwords). GPT-3 has 175B parameters and was trained on 300 billion tokens.
+
+After pretraining, the next stage is to align the model to be an assistant/create outputs corresponding to prompts. This is done by first collecting thousands of question-answer pairs and train the model to expect a question and an answer pair.
+
+Then, the second step is to have differnt raters rank responses in order of preference to train a reward model to predict the desirability of each response. The third step is to optimize the policy gradient using the PPO RL optimizer to fine tune the answer policy to score a high reward according to the reward model.
+
+These fine-tuning steps move the model from a document completer to a question-answerer. 
+
+That is the end of the tutorial, and this article. Hope this explanation made sense and you learned something; I certainly did while writing it!
