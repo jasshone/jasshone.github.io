@@ -1,6 +1,5 @@
 ## First Blog Post!
-![celebrate](celebrate.jpg)
-
+<img src = "celebrate.jpg"/>
 
 
 <p>
