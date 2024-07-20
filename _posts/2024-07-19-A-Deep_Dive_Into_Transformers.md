@@ -1,5 +1,5 @@
 ## A Deep Dive Into Transformers
-
+<img width=40% src = "https://machinelearningmastery.com/wp-content/uploads/2021/08/attention_research_1.png" alt = "Transformer model"/>
 I went through the classic Karpathy tutorial on how to build a transformer from scratch, and I thought there was an opportunity to further digest and make explicit the concepts and elements that were covered in the tutorial in a written format. My goal is to make everything as understandable/"follow-alongable" as possible, in part also for my own understanding. Without further ado, here is my written take on making a basic language transformer. 
 
 ### Data Processing
@@ -447,9 +447,10 @@ The loss slightly decreases from adding the head (2.4).
 
 That was a very long section, but luckily we are now done. (1:21:58 in the video)
 
+---
 ### Multi-headed Self-attention
 
-<img width="178" alt="image" src="https://github.com/user-attachments/assets/5b016719-0a47-4383-88de-d9ffeb65e650">
+<img width=40% alt="image" src="https://github.com/user-attachments/assets/5b016719-0a47-4383-88de-d9ffeb65e650">
 
 We previously implemented a single attention head; multi-head self-attention is having multiple of these heads, and concatenating then aggregating their results. 
 
@@ -523,7 +524,7 @@ By training this new model, the loss reduces a bit more (2.28).
 
 The intuition about the reduced loss is that it helps to have more communication channels between the tokens so more information can be paid attention to and learned from. With that, multiheaded self-attention is complete. (1:24:15 in the video)
 
-
+---
 ### Feedforward layers
 
 Previously, the model went straight from multi-headed self attention to logits. This meant that the tokens did not have much time to "think on" what they found from the other tokens. To solve this, we add a small feedforward layer with a nonlinearity to allow for this "thinking" to occur. Essentially, self-attention allows for communication between tokens, and once the communication/data gathering has occurred, now the tokens "think" on that data independently.
@@ -594,6 +595,8 @@ class BigramLanguageModel(nn.Module):
 ```
 
 This addition decreases loss slightly to 2.24. 
+
+---
 
 ### Blocks
 
@@ -669,7 +672,7 @@ class BigramLanguageModel(nn.Module):
             idx = torch.cat((idx, idx_next), dim = 1)
         return idx
 ```
-
+---
 
 ### Optimizations
 
@@ -679,7 +682,7 @@ At this point, because the neural net is starting to become pretty deep, there's
 
 The first optimization is adding residual/skip connections between nodes. The way that these work is that you take the input, pass it through the block, then add the original input to the result.
 
-<img width="236" alt="image" src="https://github.com/user-attachments/assets/ed441789-ae33-45bb-a6fa-e056d93aacee">
+<img width=40% alt="image" src="https://github.com/user-attachments/assets/ed441789-ae33-45bb-a6fa-e056d93aacee">
 
 You can think of it as a residual pathway for which there's a branch off of it which performs some computation, and then is combined back into the pathway by addition. In the beginning of training, this basically allows the gradients from the supervision to directly propogate back to early layers, and the intermediate blocks only kick in over time. 
 
@@ -733,7 +736,7 @@ class FeedForward(nn.Module):
         return self.net(x)
 ```
 
-##### Position-wise Feed-Forward Networks
+#### Position-wise Feed-Forward Networks
 Within the original Attention is All You Need paper, the channel size of the inner layer of the feed-forward network is multiplied by 4. This change looks like the following:
 
 ```python
@@ -751,7 +754,7 @@ class FeedForward(nn.Module):
 The loss further decreases after training this model (2.08). However, at this network size, we are starting to see some overfitting (train loss < val loss).
 
 
-### 2. Layernorm
+#### 2. Layernorm
 
 A related concept, Batchnorm, basically makes sure that across the batch dimension, the outputs of neurons are unit gaussian (0 mean, 1 std). Layernorm is the same thing except instead of normalizing the columns of the output we normalize the rows. For each individual example, the outputs will now be normalized.
 
@@ -820,6 +823,8 @@ class BigramLanguageModel(nn.Module):
 
 
 There is again a slight improvement in loss by adding the LayerNorms (2.08). With that, we move on the final part of the tutorial, scaling up the model! (1:37:42 in the video)
+
+---
 
 ### Scaling Up the Model
 We have basically all of the pieces in place at this point; now it's just cleaning up the code to allow for creating larger models.
@@ -949,6 +954,8 @@ dropout = 0.2
 ```
 
 The loss decreases again from this model quite substantially (1.49) and the output is much more similar to english. Now, the coding portion is complete! (1:42:30 in the video)
+
+---
 
 ### Conclusions + Where to Go from Here
 
