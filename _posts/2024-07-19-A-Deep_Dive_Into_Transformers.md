@@ -250,7 +250,7 @@ This version is also essentially the same as the previous versions, except it us
 tril = torch.tril(torch.ones(T,T))
 wei = torch.zeros((T,T))
 wei = wei.masked_fill(tril == 0, float('-inf')) # when tril == 0, fill in wei as -inf
-wei = F.softmax(wei, dim = -1
+wei = F.softmax(wei, dim = -1)
 xbow3 = wei @ x
 torch.allclose(xbow, xbow3) #returns True
 ```
@@ -309,6 +309,47 @@ class BigramLanguageModel(nn.Module):
             idx = torch.cat((idx, idx_next), dim = 1)
         return idx
 ```
-### Version 4: Self-attention!!
+
+#### Version 4: Self-attention!!
+
+So this is basically the crux of the tutorial, and it builds upon the last version we made with softmax. As mentioned at the end of Version 3, we want to leverage the ability of softmax to convert logits to probabilities to weight input tokens differently rather than taking a simple average of the input tokens. 
+
+The way that we do this is as follows:
+
+1. Every token at each position will emit two vectors: a query and a key. The query is roughly "what am I looking for", and the key vector is roughly "what do I contain".
+2. To compute affinities between tokens in a sequence, we can simply take the dot product of the keys and queries. For one token, that would be the token's query dot product with all of the keys of the other tokens in the sequence.
+3. If a key and a query are aligned, then the dot product will be high, which will make the model learn more from this specific token when predicting the target.
+4. We take this matrix which is the result of the dot product, remove tokens which are in the future of the current token, and then softmax the result to convert the logits to probabilities
+5. Then, we convert the input to a value vector, which takes the input and adds another layer of filtering/complexity to better convey the useful information the head found from this input, and multiply it by the resulting matrix in the 4th step.
+
+To illustrate how keys and queries work, suppose we have a vocab of "a", "b", "c", "d", "e", "f" and the number of dimensions in the key/query vectors (or `head_size`) is 3. Say that "a" has the query vector of <2, 1, 0>, "b" has the key vector of <1, 2, 0>, and "c" has the key vector of <0,0,1>. By multiplying the query by the keys, we find that we should "pay attention" to "b" more than "c" when the last token in the sequence is "a". 
+
+Here is the implementation of a single head of self-attention:
+
+```python
+torch.manual_seed(1337)
+B,T,C = 4,8,32 # batch, time, channels
+x = torch.rand(B,T,C) # would be the input vector
+
+head_size = 16 # dimension of the keys and queries
+
+#map each potential token to a `head_size` dim key
+key = nn.Linear(C, head_size, bias = False)
+#map each potential token to a `head_size` dim query
+query = nn.Linear(C, head_size, bias = False)
+
+#map each potential token to a `head_size` dim value
+value = nn.Linear(C, head_size, bias = False)
+
+k = key(x) #(B,T,16)
+q = query(x) #(B,T,16)
+wei = q @ k.transpose(-2, -1) #get dot product, (B, T, 16) @ (B,16,T) ---> (B,T,T)
 
 
+#remove tokens in the future of the current timestep
+tril = torch.tril(torch.ones(T,T))
+wei = wei.masked_fill(tril == 0, float('-inf')) # when tril == 0, fill in wei as -inf
+wei = F.softmax(wei, dim = -1)
+v = value(x)
+out = wei @ v
+```
