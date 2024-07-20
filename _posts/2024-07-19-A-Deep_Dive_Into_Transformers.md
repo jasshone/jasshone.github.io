@@ -1,5 +1,5 @@
 ## A Deep Dive Into Transformers
-<img width=40% alt="image" src="https://github.com/user-attachments/assets/df39c467-c620-489b-a167-512b41c52d64">
+<img width="40%" alt="image" src="https://github.com/user-attachments/assets/df39c467-c620-489b-a167-512b41c52d64">
 
 
 I went through the classic Karpathy tutorial on how to build a transformer from scratch, and I thought there was an opportunity to further digest and make explicit the concepts and elements that were covered in the tutorial in a written format. My goal is to make everything as understandable/"follow-alongable" as possible, in part also for my own understanding. Without further ado, here is my written take on making a basic language transformer. 
