@@ -353,3 +353,14 @@ wei = F.softmax(wei, dim = -1)
 v = value(x)
 out = wei @ v
 ```
+
+
+#### Some Notes
+One note that Karpathy makes is that tokens across batches do not communicate with each other, so you can treat them as separate computations. Another note is that in an encoder block, all of the nodes can talk to each other (no mask with tril), so our head is a decoder block (nodes from the future cannot be referenced).
+
+There's also a difference between what we implemented, which is a self-attention head, and a cross-attention head. In a self-attention head, the keys, queries, and values come from the same source; in a cross-attention head, the queries may come from x, but the keys and values may come from a seperate source such as an encoder block.
+
+Another important step that we didn't add that is in the original "Attention is All You Need" paper is scaling the result of Q @ K.T down by `sqrt(head_size)`. This is because if the key and query matrices are unit gaussian, then because the dimension is `head_size`, the variance will also be on the order of `head_size`. Since the result of Q @ K.T will be fed into softmax, it should be fairly diffuse because otherwise when faced with extreme values, softmax will converge to one-hot vectors (which limits the information each node gets to essentially only one other node).
+
+
+
