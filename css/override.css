@@ -6,6 +6,7 @@ hr {
 #intro{
   display: flex;
   margin-bottom: 20px;
+  align-items: flex-end;
 }
 #profile{
   width:30vw;
