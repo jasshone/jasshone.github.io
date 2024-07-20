@@ -452,7 +452,7 @@ That was a very long section, but luckily we are now done. (1:21:58 in the video
 ---
 ### Multi-headed Self-attention
 
-<img width=40% alt="image" src="https://github.com/user-attachments/assets/5b016719-0a47-4383-88de-d9ffeb65e650">
+<img width="40%" alt="image" src="https://github.com/user-attachments/assets/5b016719-0a47-4383-88de-d9ffeb65e650">
 
 We previously implemented a single attention head; multi-head self-attention is having multiple of these heads, and concatenating then aggregating their results. 
 
@@ -684,7 +684,7 @@ At this point, because the neural net is starting to become pretty deep, there's
 
 The first optimization is adding residual/skip connections between nodes. The way that these work is that you take the input, pass it through the block, then add the original input to the result.
 
-<img width=40% alt="image" src="https://github.com/user-attachments/assets/ed441789-ae33-45bb-a6fa-e056d93aacee">
+<img width="40%" alt="image" src="https://github.com/user-attachments/assets/ed441789-ae33-45bb-a6fa-e056d93aacee">
 
 You can think of it as a residual pathway for which there's a branch off of it which performs some computation, and then is combined back into the pathway by addition. In the beginning of training, this basically allows the gradients from the supervision to directly propogate back to early layers, and the intermediate blocks only kick in over time. 
 
