@@ -3,6 +3,9 @@ hr {
   margin-bottom: 20px;
 }
 
+#intro{
+  display: flex;
+}
 /* Post navigation links */
 .post_navi {
   display: flex;
