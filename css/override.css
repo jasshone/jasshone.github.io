@@ -8,7 +8,10 @@ hr {
   margin-bottom: 20px;
 }
 #profile{
-  width:50%;
+  width:30vw;
+}
+#info{
+  width:30vw;
 }
 /* Post navigation links */
 .post_navi {
