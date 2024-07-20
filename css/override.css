@@ -7,7 +7,9 @@ hr {
   display: flex;
   margin-bottom: 20px;
 }
-
+#profile{
+  width:50%;
+}
 /* Post navigation links */
 .post_navi {
   display: flex;
