@@ -377,10 +377,6 @@ class Head(nn.Module):
         self.register_buffer('tril', torch.tril(torch.ones(block_size,block_size)))
 
     def forward(self, x, targets):
-        '''
-        idx and targets are the input and target blocks
-        respectively that we get from the dataloader
-        '''
         B, T, C = x.shape
         k = self.key(idx)
         q = self.query(idx)
