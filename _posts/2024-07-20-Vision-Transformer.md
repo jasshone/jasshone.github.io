@@ -180,6 +180,11 @@ In particular, because the input data is now image-based, the authors needed a w
 
 After the embedded images are passed through the transformer encoder, there is also an extra MLP head added to project the encodings to a specific class, which we will also discuss in a bit.
 
+## Data
+
+So a quick summary of the data used in the paper: most vision datasets consist of labelled images, or classification datasets. One of the most famous/largest is ImageNet, which is what the authors use for pretraining. As such, the data consists of images and corresponding labels.
+
+
 ## Pre-transformer image encoding
 
 This is the crux of the paper, which is how to convert image data into sequential data which is used in a transformer. There's a couple of innovations
