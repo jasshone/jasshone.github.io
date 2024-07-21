@@ -239,13 +239,20 @@ This table looks something like this:
 
 ```python
 #each possible position in sequence of N patches retrieves a D dimensional vector
-self.position_embedding_table = nn.Embedding(N, D) 
+self.position_embedding_table = nn.Embedding(N, D)
+
+#or the more common implementation, which is
+self.pos_emb = nn.Parameter(torch.zeros(1, N, D))
+#which can then be initalized to weights in a normal distribution as
+nn.init.normal_(self.pos_emb, std = 1e-6)
 ```
 
 And in the forward function of our model, we can call the following to encode our patch sequence:
 
 ```python
 pos_emb = self.position_embedding_table(torch.arange(N, device = device))
+
+#or just self.pos_emb if using the nn.Parameter implementation.
 ```
 
 
@@ -262,13 +269,70 @@ x = proj(patches) + pos_emb #works with no error
 
 ### Class token
 
-In order to have the ViT classify the correct class, the paper prepends a learnable embedding of the class as a token to the sequence of patches. The idea is that 
-eventually after the embeddings pass through the transformer, the model can use a "classification head" to interpret the class token and output the final class.
+A question that you may have is, if transformers were originally used to generate the next item in a sequence, how would we use a transformer to perform a classification task?
+
+The answer used in the paper is that the authors prepend a learnable embedding to the beginning of the embedded patches. The idea is that eventually after the embeddings pass through the transformer, the model uses a "classification head" to interpret the class token and output the final class.
+
+We again implement this through a lookup table, except this time there is only one possible input which retrieves the learned embedding. 
+
+
+
+This table looks something like this:
+
+```python
+#the CLASS token retrieves a D dimensional learnable embedding
+self.cls_token_table = nn.Embedding(1, D)
+
+#or the more common implementation, which is
+self.cls_emb = nn.Parameter(torch.zeros(1, 1, D))
+#which can then be initalized to weights in a normal distribution as
+nn.init.normal_(self.cls_emb, std = 1e-6)
+```
+
+And in the forward function of our model, we can call the following to encode our patch sequence:
+
+```python
+cls_emb = self.position_embedding_table(torch.arange(1))
+
+#or just self.cls_emb if using the nn.Parameter implementation.
+```
+
+
 
 Let's implement a preliminary version of the model wrapper class for the vision transformer with patches and position embeddings included.
 
+```python
+class ViT(nn.Module):
+    def __init__(self, patch_size):
+        super().__init__()
+        #patch embedding
+        self.patch_embedding = lambda x: x.reshape(B, N, P**2*C)
+        #extra position (N ---> N+1) because of CLASS token
+        self.pos_emb = nn.Parameter(torch.zeros(1, N+1, D)) 
+        nn.init.normal_(self.pos_emb, std = 1e-6)
+        self.cls_emb = nn.Parameter(torch.zeros(1, 1, D))
+        nn.init.normal_(self.cls_emb, std = 1e-6)
+        self.proj = nn.Linear(P**2*C, D)
+        
+    def forward(self, idx, targets):
+        '''
+        idx and targets are the input and target blocks
+        respectively that we get from the dataloader
+        '''
+    
+        patches = self.patch_embedding(idx) #(B, N, P^2*C)
+        #expands the embedding to have a batch dim
+        cls_emb = self.cls_emb.expand(B, -1, -1) #(B, 1, 1)
 
+        #project patches to token dimension
+        patches = self.proj(patches) #(B, N+1, D)
 
+        #concatenate the class embedding to the front of the patches in the N dimension
+        x = torch.cat((cls_emb, patches), dim = 1) #(B, N+1, D)
+
+        #add the position embedding to keep positional info
+        x = x + self.pos_emb
+```
 
 
 
