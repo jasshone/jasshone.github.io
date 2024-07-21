@@ -334,6 +334,208 @@ class ViT(nn.Module):
         x = x + self.pos_emb
 ```
 
+We have now finished going through the crux of the paper! 
 
+## Transformer Encoder
+
+This section is basically a repeat from the text-based transformer, but I'll go through how to do it for good measure.
+
+First, we implement a single attention head:
+
+```python
+class Head(nn.Module):
+    def __init__(self, head_size):
+        super().__init__()
+        self.key = nn.Linear(D, head_size, bias = False)
+        self.query = nn.Linear(D, head_size, bias = False)
+        self.value = nn.Linear(D, head_size, bias = False)
+    def forward(self, x):
+        #no mask because encoder
+        k = self.key(x)
+        q = self.query(x)
+        v = self.value(x)
+        wei = q @ k.transpose(-2, -1) * D ** -0.5
+        return F.softmax(wei, dim = -1) @ v
+```
+
+Then, we implement Multi-head Attention:
+
+```python
+class MultiHeadAttention(nn.Module):
+    def __init__(self, num_heads):
+        super().__init__()
+        head_size = D // num_heads
+        self.heads = nn.ModuleList([Head(head_size) for i in range(num_heads)])
+        self.proj = nn.Linear(D, D)
+        self.dropout = nn.Dropout(dropout)
+    def forward(self, x):
+        out = torch.cat([head(x) for head in self.heads], dim = -1)
+        return self.dropout(self.proj(out))
+```
+
+And the MLP/feed forward layer, which uses GELU instead of ReLU activation.
+
+```python
+class FeedForward(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(D, 4*D),
+            nn.GELU(),
+            nn.Linear(4*D, D),
+            nn.Dropout(dropout),
+        )
+    def forward(self, x):
+        return self.net(x)
+```
+
+We combine these components into `Block`:
+
+```python
+class Block(nn.Module):
+    def __init__(self, n_head):
+        super().__init__()
+        self.mha = MultiHeadAttention(n_head)
+        self.mlp = FeedForward()
+        self.ln1 = nn.LayerNorm(D)
+        self.ln2 = nn.LayerNorm(D)
+    def forward(self, x):
+        x = x + self.mha(self.ln1(x))
+        x = x + self.mlp(self.ln2(x))
+        return x
+```
+
+And then finally compose an `Encoder` class:
+
+```python
+class Encoder(nn.Module):
+    def __init__(self, n_head, n_blocks):
+        super().__init__()
+        self.blocks = nn.Sequential(*[Block(n_head) for _ in range(n_blocks)])
+        self.layernorm = nn.LayerNorm(D)
+    def forward(self, x):
+        return self.layernorm(self.blocks(x))
+```
+
+Now, we are ready to add this `Encoder` class to the `ViT`:
+
+```python
+class ViT(nn.Module):
+    def __init__(self, patch_size, n_head, n_blocks):
+        super().__init__()
+        #patch embedding
+        self.patch_embedding = lambda x: x.reshape(B, N, P**2*C)
+        #extra position (N ---> N+1) because of CLASS token
+        self.pos_emb = nn.Parameter(torch.zeros(1, N+1, D)) 
+        nn.init.normal_(self.pos_emb, std = 1e-6)
+        self.cls_emb = nn.Parameter(torch.zeros(1, 1, D))
+        nn.init.normal_(self.cls_emb, std = 1e-6)
+        self.proj = nn.Linear(P**2*C, D)
+        self.encoder = Encoder(n_head, n_blocks)
+        
+    def forward(self, idx, targets):
+        '''
+        idx and targets are the input and target blocks
+        respectively that we get from the dataloader
+        '''
+    
+        patches = self.patch_embedding(idx) #(B, N, P^2*C)
+        #expands the embedding to have a batch dim
+        cls_emb = self.cls_emb.expand(B, -1, -1) #(B, 1, 1)
+
+        #project patches to token dimension
+        patches = self.proj(patches) #(B, N+1, D)
+
+        #concatenate the class embedding to the front of the patches in the N dimension
+        x = torch.cat((cls_emb, patches), dim = 1) #(B, N+1, D)
+
+        #add the position embedding to keep positional info
+        x = x + self.pos_emb
+
+        #pass x through the encoder
+        x = self.encoder(x)
+
+```
+
+## Classification Head
+
+The paper specifies that the classification head only takes in the state of the CLASS token and converts it to the number of classes in the data. During pretraining there is one hidden layer, and in fine-tuning, there is only a single linear layer. 
+
+Since the paper doesn't specify the dimensions of the hidden layer, we can for now use the 4*input ratio used in the feed forward/MLP layers of the attention blocks. 
+
+After adding the head, `ViT` now looks like this:
+
+```python
+class ViT(nn.Module):
+    def __init__(self, patch_size, n_head, n_blocks, num_classes):
+        super().__init__()
+        #patch embedding
+        self.patch_embedding = lambda x: x.reshape(B, N, P**2*C)
+        #extra position (N ---> N+1) because of CLASS token
+        self.pos_emb = nn.Parameter(torch.zeros(1, N+1, D)) 
+        nn.init.normal_(self.pos_emb, std = 1e-6)
+        self.cls_emb = nn.Parameter(torch.zeros(1, 1, D))
+        nn.init.normal_(self.cls_emb, std = 1e-6)
+        self.proj = nn.Linear(P**2*C, D)
+        self.encoder = Encoder(n_head, n_blocks)
+
+        #classification head with one hidden layer
+        self.cls_head = nn.Sequential(
+            nn.Linear(D, 4*D),
+            nn.Linear(4*D, num_classes),
+        )
+        
+    def forward(self, idx, targets):
+        '''
+        idx and targets are the input and target blocks
+        respectively that we get from the dataloader
+        '''
+    
+        patches = self.patch_embedding(idx) #(B, N, P^2*C)
+        #expands the embedding to have a batch dim
+        cls_emb = self.cls_emb.expand(B, -1, -1) #(B, 1, 1)
+
+        #project patches to token dimension
+        patches = self.proj(patches) #(B, N+1, D)
+
+        #concatenate the class embedding to the front of the patches in the N dimension
+        x = torch.cat((cls_emb, patches), dim = 1) #(B, N+1, D)
+
+        #add the position embedding to keep positional info
+        x = x + self.pos_emb
+
+        #pass x through the encoder
+        x = self.encoder(x)
+
+        #feed the CLASS token into the classification head
+        logits = self.cls_head(x[:,0,:]) #(B, num_classes)
+
+        #compute loss
+        loss = F.cross_entropy(logits, targets) # have same shape, (B, num_classes)
+        return logits, loss
+```
+## Closing Remarks
+
+So, we have now implemented a vision transformer from scratch, mostly using similar concepts to the language transformer but also adding some new concepts such as patches and the classification head. One of the major reasons why I wanted to implement a vision transformer was that my current research uses embeddings from vision transformers so I wanted to get a deeper understanding of how they worked.
+
+In terms of remarks about the paper, one interesting thing is that the parameters/number of heads is a lot less for these ViT's compared to GPT.
+
+<img width="100%" alt="image" src="https://github.com/user-attachments/assets/7dcd2588-3456-4652-8305-40c978df9ae5">
+
+For context, GPT-2 has 1.5B parameters, and GPT-3 has 175B.
+
+However, after this paper was written, a vision transformer called DINO v2 was trained, for which the largest model (ViT-g/14) has 1.1B parameters, which is on the order of GPT-2's parameters. To the best of my knowledge, there is not yet a vision transformer which uses as much parameters as GPT-3 though, but perhaps in the future such a transformer will transform vision just as GPT-3 transformed NLP.
+
+Another interesting bit from the paper is that similar to GPT, the ViT is first pre-trained on large datasets then fine-tuned to smaller downstream tasks. The only change in the network between the stages is that the classification head from pre-training is detached and changed to a single linear layer which is D x K to convert the class embedding to the number of classes in the downstream task (K). This step is a lot less complicated than the fine-tuning step for GPT, which makes sense since the task is classification rather than generation.
+
+There's also this really interesting paragraph comparing CNNs to ViT, which I will put here:
+
+<img width="100%" alt="image" src="https://github.com/user-attachments/assets/a0a0f9b7-43ec-4244-a56d-675b1becb7e7">
+
+I think the intuition is that in a CNN, you use kernels which inherently localizes the features the model picks up on to the neighborhood of a pixel. However, the transformer applies attention between all of the patches, which removes this localization, which removes the "image-specific inductive biases" of assuming that "locality/two-dim neighborhood structure/translation equivariance" is true.
+
+There's also some minor changes to the ViT architecture nowadays that I didn't cover in this blogs, such as the concept of registers and rotary positional embeddings. I will hopefully talk about them in a future post though.
+
+All-in-all, I hope you learned something, and thanks for reading!
 
 
