@@ -524,7 +524,7 @@ In terms of remarks about the paper, one interesting thing is that the parameter
 
 For context, GPT-2 has 1.5B parameters, and GPT-3 has 175B.
 
-However, after this paper was written, a vision transformer called DINO v2 was trained, for which the largest model (ViT-g/14) has 1.1B parameters, which is on the order of GPT-2's parameters. To the best of my knowledge, there is not yet a vision transformer which uses as much parameters as GPT-3 though, but perhaps in the future such a transformer will transform vision just as GPT-3 transformed NLP.
+However, after this paper was written, a vision transformer called DINO v2 was trained, for which the largest model (ViT-g/14) has 1.1B parameters, which is more on the order of GPT-2's parameters. To the best of my knowledge, there is not yet a vision transformer which uses as much parameters as GPT-3 though, but perhaps in the future such a transformer will transform vision just as GPT-3 transformed NLP.
 
 Another interesting bit from the paper is that similar to GPT, the ViT is first pre-trained on large datasets then fine-tuned to smaller downstream tasks. The only change in the network between the stages is that the classification head from pre-training is detached and changed to a single linear layer which is D x K to convert the class embedding to the number of classes in the downstream task (K). This step is a lot less complicated than the fine-tuning step for GPT, which makes sense since the task is classification rather than generation.
 
