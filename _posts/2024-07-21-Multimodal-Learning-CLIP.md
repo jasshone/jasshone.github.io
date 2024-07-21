@@ -204,7 +204,7 @@ Now, let's add the separate classes for the vision transformer and the text tran
 1. the output of both must be an encoding
 2. the way that the text transformer's encoding is done is very similar to that of the vision transformer, in that the text sequence is bracketed by start and end of sentence tokens (\[SOS], \[EOS]) and the final encoding is just the value of the EOS token at the last layer of the text transformer.
 
-Here is the implementation of the vision transformer, which is basically the same except the authors add an additional layer norm after the positional encodings and patch embeddings are added.
+Here is the implementation of the vision transformer, which is basically the same except the authors add an additional layer norm after the positional encodings and patch embeddings are added together.
 
 ```python
 class ViT(nn.Module):
