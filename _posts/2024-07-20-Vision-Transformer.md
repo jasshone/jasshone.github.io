@@ -320,11 +320,7 @@ class ViT(nn.Module):
         self.proj = nn.Linear(P**2*C, D)
         
     def forward(self, idx, targets):
-        '''
-        idx and targets are the input and target blocks
-        respectively that we get from the dataloader
-        '''
-    
+        
         patches = self.patch_embedding(idx) #(B, N, P^2*C)
         #expands the embedding to have a batch dim
         cls_emb = self.cls_emb.expand(B, -1, -1) #(B, 1, 1)
@@ -439,11 +435,6 @@ class ViT(nn.Module):
         self.encoder = Encoder(n_head, n_blocks)
         
     def forward(self, idx, targets):
-        '''
-        idx and targets are the input and target blocks
-        respectively that we get from the dataloader
-        '''
-    
         patches = self.patch_embedding(idx) #(B, N, P^2*C)
         #expands the embedding to have a batch dim
         cls_emb = self.cls_emb.expand(B, -1, -1) #(B, 1, 1)
@@ -491,11 +482,7 @@ class ViT(nn.Module):
         )
         
     def forward(self, idx, targets):
-        '''
-        idx and targets are the input and target blocks
-        respectively that we get from the dataloader
-        '''
-    
+
         patches = self.patch_embedding(idx) #(B, N, P^2*C)
         #expands the embedding to have a batch dim
         cls_emb = self.cls_emb.expand(B, -1, -1) #(B, 1, 1)
