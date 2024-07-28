@@ -1,6 +1,6 @@
 # Diffusion Models
 
-My original plans were to make a post about some papers in RL first, but I got busy this week and diffusion got more relevant for my research. Therefore, I will be talking about Diffusion Models in this post.
+My original plans were to make a post about some papers in RL first, but I got busy this week and the need to understand diffusion models got more relevant for my research. Therefore, I will be talking about Diffusion Models instead in this post.
 
 I will first give a high-level overview of diffusion models based on some blogs, explainers, and Denoising Diffusion Probabilistic Models by Ho et al., then try to implement a diffusion model from scratch as per the other posts.
 
@@ -8,12 +8,12 @@ I will first give a high-level overview of diffusion models based on some blogs,
 
 Let's get started!
 
-## Core Ideas of Diffusion Models
+# Core Ideas of Diffusion Models
 
 Diffusion models try to generate data similar to their training data. The way they do this is through cleverly adding Gaussian noise to the image and then learning to recover the original image from this noise.
 Then, after training, it can take in random noise and create data. To further explain this process, we have to delve into the realm of math (specifically Markov Chains and probability).
 
-### Math, or Markov Chains and Probability
+## Math, or Markov Chains and Probability
 
 Markov chains are a fancy name for a relatively intuitive idea. Say that if it's sunny today, there is a 20% chance that it'll be rainy tomorrow, 10% chance it'll be cloudy, and 70% chance it'll continue being sunny. Say that we similarly know exactly the probabilities that we will reach a kind of day given that we start with a rainy and cloudy day.
 
@@ -46,7 +46,7 @@ Noising
 
 Denoising
 
-### Even More Math, or Gaussian Noise
+## Even More Math, or Gaussian Noise
 
 So the forward process can be formally stated as follows:
 
@@ -68,11 +68,11 @@ Or specifically denoting the noised distribution of $x$ with mean $\mu$ and stan
 
 <img width="80%" alt="image" src="https://github.com/user-attachments/assets/e49ef22b-d44d-4cd3-ada3-0d8f62fdf86b">
 
-To understand this proof, you would probably need some background in probability, but in practice this theory doesn't matter too much in the implementation of a diffusion model.
+To understand this proof, you would need some background in probability, but in practice this theory doesn't matter too much in the implementation of a diffusion model.
 
-The actual paper has some additional parameters, specifically beta, beta tilde, alpha, alpha bar, etc. These are chosen contingent on beta, which is the amount of noise to add at each step, determined by something called cosine sampling.
+The actual paper has some additional parameters, specifically beta, beta tilde, alpha, alpha bar, etc. These are chosen contingent on beta, which is the amount of noise to add at each step.
 
-### Training the Model (+ some more math)
+## Training the Model (+ some more math)
 
 The model we will use is called a UNet, which looks as follows:
 
@@ -86,8 +86,153 @@ In terms of loss, we want to use the KL Divergence. The KL Divergence measures t
 
 This can be approximated as a L2 loss function (the details of which are pretty complex, so they are omitted).
 
-## Making a Minimal Diffusion Model
+# Making a Minimal Diffusion Model
 
-So I will be attempting to create a minimal diffusion model, referencing various resources and a bit of the original paper (which is quite dense, unfortunately).
+So I will be attempting to create a minimal diffusion model, referencing various resources and a bit of the original paper (which is quite dense, but I'll try my best).
+One repo I found particularly helpful was [this repo by Dominic Rampas](https://github.com/dome272/Diffusion-Models-pytorch/blob/main/ddpm.py), as well as [this blog](https://medium.com/@mickael.boillaud/denoising-diffusion-model-from-scratch-using-pytorch-658805d293b4)
+
+## Part 0: Notation
+
+First, let's go over some important variables and their meanings. 
+$\beta_t$ or beta at timestep t: the amount of noise to add at the given timestep, determined by a scheduler.
+
+$\alpha_t$ or alpha at timestep t: $1-\beta_t$
+
+$\bar{\alpha}_t$, or alpha hat: product of all alpha values from the first timestep to timestep `t`
+
+## Part 1: Noise
+
+A fundamental part of a diffusion model is the noising process. To do this, we need to get the noise scheduler, $\beta$, and then apply the result to an input.
+
+For simplicity of implementation, we will be using a linear noise scheduler, defined as follows:
+
+```python
+def schedule_noise(beta_start, beta_end, steps):
+  '''
+  returns a linear schedule from `beta_start` to `beta_end`, with `steps` steps in between
+  '''
+  return torch.linspace(beta_start, beta_end, steps)
+
+```
+Then, we can calculate the alpha and alpha hat values for each timestep as follows:
+
+```python
+beta = schedule_noise(beta_start, beta_end, steps)
+alpha = 1. - beta
+alpha_hat = torch.cumprod(alpha, dim=0)
+```
+
+Now that we have these values, we can get the noised images at a specific timestep given input `x` by rearranging this equation:
+
+<img width="90%" alt="image" src="https://github.com/user-attachments/assets/fab122f3-045d-439d-a890-a87dadf639f5">
+
+to get
+
+$x_t = \sqrt{\bar{a}_t} * x_0 + \sqrt{1-\bar{a}_t}*\mathcal{E}$ where $`\mathcal{E}`$ is the gaussian noise.
+
+
+Let's implement this in code.
+
+```python
+def get_noised_images(x, t, alpha_hat):
+  epsilon = torch.rand_like(x) #B C H W
+  sqrt_alpha_hat = torch.sqrt(alpha_hat[t]).view(-1, 1, 1, 1) #B 1 1 1
+  sqrt_one_minus_alpha_hat = torch.sqrt(1-alpha_hat[t]).view(-1, 1, 1, 1) #B 1 1 1
+  return sqrt_alpha_hat * x + sqrt_one_minus_alpha_hat * epsilon, epsilon
+  
+```
+
+To validate that this works for yourself, you can run this code snippet which is the previous code snippets composed with random parameter values.
+
+```python
+import torch
+def schedule_noise(beta_start, beta_end, steps):
+  '''
+  returns a linear schedule from `beta_start` to `beta_end`, with `steps` steps in between
+  '''
+  return torch.linspace(beta_start, beta_end, steps)
+
+beta = schedule_noise(1e-4, 0.02, 100000)
+alpha = 1. - beta
+alpha_hat = torch.cumprod(alpha, dim=0)
+def get_noised_images(x, t, alpha_hat):
+  epsilon = torch.rand_like(x) #B C H W
+  sqrt_alpha_hat = torch.sqrt(alpha_hat[t]).view(-1, 1, 1, 1) #B 1 1 1
+  sqrt_one_minus_alpha_hat = torch.sqrt(1-alpha_hat[t]).view(-1, 1, 1, 1) #B 1 1 1
+  return sqrt_alpha_hat * x + sqrt_one_minus_alpha_hat * epsilon, epsilon
+
+x_t = get_noised_images(torch.rand((8, 1, 32, 32)), 1000, alpha_hat)
+print(x_t[0].shape, x_t[1].shape)
+```
+
+This should print `torch.Size([8, 1, 32, 32]) torch.Size([8, 1, 32, 32])`, which is the shape of the noised image and the noise applied to the original respectively.
+
+The function to generate the noise is now completed, and now we can move on to the model.
+
+## Part 2: Model
+
+The model that we will be using is a UNet, which again has the following architecture:
+
+<img width="80%" alt="unet" src="https://github.com/user-attachments/assets/af0e8a78-169f-4d1e-8ec2-8753c200af3c">
+
+Let's first implement the various blocks that make up this architecture, then put it all together. 
+
+### 2a. Double Convolution
+These are the various blocks that appear through the architecture, such as these:
+<img width="86" alt="image" src="https://github.com/user-attachments/assets/dab60d94-4ca1-4433-93fa-1d3cec6072c5">
+
+<img width="86" alt="image" src="https://github.com/user-attachments/assets/210ae99e-5bc5-41be-b04f-ee9ad7400cd9">
+
+There are two convolutional layers with kernel size 3 and an activation between them. While the original paper uses ReLU, GeLU is now also used. 
+Here's some accompanying code for this block.
+
+```python
+class DoubleConv(nn.Module):
+  def __init__(self, in_channels, out_channels,mult = 2, residual = False):
+    super().__init__()
+    #pre-norm
+    self.net = nn.Sequential(
+      nn.GroupNorm(1, in_channels),
+      nn.Conv2d(in_channels, mult*out_channels, 3, padding = 1),
+      nn.GELU(),
+      nn.GroupNorm(1, out_channels*mult),
+      nn.Conv2d(out_channels*mult, out_channels, 3, padding = 1)
+    )
+    #specifying if there's a residual stream
+    self.residual = residual
+  def forward(self, x):
+    if not self.residual: return self.next(x)
+    return F.gelu(x + self.net(x))
+```
+
+### 2b. Down Block
+Another block that is needed is the `Down` blocks, which are the downward arrows in the picture of the UNet architecture. These consist of a max pooling layer and two double convolutional layers. After the input passed through this block, we add an additional timestep embedding which consists of a SiLU activation and a linear layer. SiLU is another kind of activation has been shown to improve the performance of deep learning models over ReLU.
+
+
+Here's the code for a `Down` block.
+
+```python
+class Down(nn.Module):
+  def __init__(self, in_channels, out_channels, pos_emb_dim = 256):
+    super().__init__()
+    self.block = nn.Sequential(
+      nn.MaxPool2d(2),
+      DoubleConv(in_channels, in_channels, residual = True),
+      DoubleConv(in_channels, out_channels),
+    )
+  self.pos_emb = nn.Sequential(
+    nn.SiLU,
+    nn.Linear(
+      emb_dim,
+      out_channels
+    ),
+  )
+
+  def forward(self, x, t):
+    x = self.block(x)
+    t_emb = self.pos_emb(t).view(-1, -1, 1, 1).repeat(1, 1, x.shape[-2], x.shape[-1]) #reshape to be compatible with adding to x
+    return x + t_emb
+```
+
 
 
