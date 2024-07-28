@@ -150,7 +150,7 @@ def schedule_noise(beta_start, beta_end, steps):
   '''
   return torch.linspace(beta_start, beta_end, steps)
 
-beta = schedule_noise(1e-4, 0.02, 100000)
+beta = schedule_noise(1e-4, 0.02, 10000)
 alpha = 1. - beta
 alpha_hat = torch.cumprod(alpha, dim=0)
 def get_noised_images(x, t, alpha_hat):
@@ -403,7 +403,7 @@ Here's how you would do this given a batch of images, `images`:
 ```python
 model = UNet()
 optimizer = optim.AdamW(model.parameters(), lr = 1e-4)
-MAX_STEPS = 1000
+MAX_STEPS = 10000
 mse = nn.MSELoss() #l2 loss
 t = torch.randint((low=1, high=MAX_STEPS), size = (images.shape[0],)) # generate B random timesteps
 x_t, noise = get_noised_images(images, t)
@@ -451,7 +451,7 @@ for epoch in range(n_epochs):
 
         x = x.to(device)
         x = F.interpolate(x, (32, 32))
-        t = torch.randint(0, 1000, (x.shape[0],)).to(device) # Random timesteps
+        t = torch.randint(0, 10000, (x.shape[0],)).to(device) # Random timesteps
         x_t, noise = get_noised_images(x, t, alpha_hat) 
         #print(x_t.shape)
 
@@ -473,6 +473,17 @@ for epoch in range(n_epochs):
 plt.plot(losses)
 plt.ylim(0, 0.1);
 ```
+
+Here are the results I got from training the model on 10 epochs:
+
+![image](https://github.com/user-attachments/assets/dd1ddb93-e068-4063-83d0-29eff887414b)
+
+And here's a visualization of the impact of the amount of noise on the model's ability to denoise:
+
+![image](https://github.com/user-attachments/assets/29ce738f-8328-4a76-9027-28ca536c6d4f)
+
+As you can see,the more noise is added, the worse the model gets at trying to recover the original image. 
+
 # Final Thoughts
 
 Diffusion models have become a lot more well known after the introduction of stable diffusion as well as their use in Dalle-2. Another interesting fact is that diffusion models (specifically conditional diffusion models) are being used in policy learning in robotics for their ability to generate diverse samples based on a training distribution.
