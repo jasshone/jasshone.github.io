@@ -4,8 +4,6 @@ My original plans were to make a post about some papers in RL first, but I got b
 
 I will first give a high-level overview of diffusion models based on some blogs, explainers, and Denoising Diffusion Probabilistic Models by Ho et al., then try to implement a diffusion model from scratch as per the other posts.
 
-
-
 Let's get started!
 
 # Core Ideas of Diffusion Models
@@ -213,20 +211,20 @@ Here's the code for a `Down` block.
 
 ```python
 class Down(nn.Module):
-  def __init__(self, in_channels, out_channels, pos_emb_dim = 256):
+  def __init__(self, in_channels, out_channels, emb_dim = 256):
     super().__init__()
     self.block = nn.Sequential(
       nn.MaxPool2d(2),
       DoubleConv(in_channels, in_channels, residual = True),
       DoubleConv(in_channels, out_channels),
     )
-  self.pos_emb = nn.Sequential(
-    nn.SiLU,
-    nn.Linear(
-      emb_dim,
-      out_channels
-    ),
-  )
+    self.pos_emb = nn.Sequential(
+      nn.SiLU,
+      nn.Linear(
+        emb_dim,
+        out_channels
+      ),
+    )
 
   def forward(self, x, t):
     x = self.block(x)
@@ -234,5 +232,193 @@ class Down(nn.Module):
     return x + t_emb
 ```
 
+### 2c. Up Block
+Another block that is needed is the `Up` blocks, which are the upward arrows in the picture of the UNet architecture. These consist of an upsampling layer and two double convolution layers. After the input is upsampled, we concatenate the value of x in the corresponding denoising timestep, which is called a skip connection, before passing the vector through the convolution layers. Then, we again add an additional timestep embedding which consists of a SiLU activation and a linear layer. 
 
+Here's the code for a `Up` block.
+
+```python
+class Up(nn.Module):
+  def __init__(self, in_channels, out_channels, emb_dim = 256):
+    super().__init__()
+    self.up = nn.Upsample(scale_factor = 2, mode = "nearest", align_corners = True)
+    self.block = nn.Sequential(
+      DoubleConv(in_channels, in_channels, residual = True),
+      DoubleConv(in_channels, out_channels, 1/2),
+    )
+    self.pos_emb = nn.Sequential(
+      nn.SiLU,
+      nn.Linear(
+        emb_dim,
+        out_channels
+      ),
+    )
+
+  def forward(self, x, skip_x, t):
+    x = self.up(x)
+    x = self.block(torch.cat([skip_x, x], dim = 1))
+    t_emb = self.pos_emb(t).view(-1, -1, 1, 1).repeat(1, 1, x.shape[-2], x.shape[-1]) #reshape to be compatible with adding to x
+    return x + t_emb
+```
+### 2d. Putting it all together
+
+Now, we just need to compose these blocks into a UNet architecture.
+
+This is done following this image again:
+
+<img width="80%" alt="unet" src="https://github.com/user-attachments/assets/af0e8a78-169f-4d1e-8ec2-8753c200af3c">
+
+Here's the code, which isn't too interesting besides replicating the architecture.
+
+```python
+class UNet(nn.Module):
+  def __init__(self):
+    super().__init__()
+    self.conv1 = DoubleConv(1, 64)
+    self.down1 = Down(64, 64)
+    self.conv2 = DoubleConv(64, 128)
+    self.down2 = Down(128, 128)
+    self.conv3 = DoubleConv(128, 256)
+    self.down3 = Down(256, 256)
+    self.conv4 = DoubleConv(256, 512)
+    self.down4 = Down(512, 512)
+    self.conv5 = DoubleConv(512, 1024)
+    self.up1 = Up(1024, 1024)
+    self.conv6 = DoubleConv(1024, 512)
+    self.up2 = Up(512, 512)
+    self.conv7 = DoubleConv(512, 256)
+    self.up3 = Up(256, 256)
+    self.conv8 = DoubleConv(256, 128)
+    self.up4 = Up(128, 128)
+    self.conv9 = DoubleConv(128, 64)
+    self.out = nn.Conv2d(64, 1, 1)
+  
+  def forward(self, x, t):
+    x1 = self.conv1(x)
+    x2 = self.down1(x1, t)
+    x3 = self.conv2(x2)
+    x4 = self.down2(x3, t)
+    x5 = self.conv3(x4)
+    x6 = self.down3(x5, t)
+    x7 = self.conv4(x6)
+    x8 = self.down4(x7, t)
+    x9 = self.conv5(x8)
+    x10 = self.up1(x9, x7, t)
+    x11 = self.conv6(x10)
+    x12 = self.up2(x11, x5, t)
+    x13 = self.conv7(x12)
+    x14 = self.up3(x13, x3, t)
+    x15 = self.conv8(x14)
+    x16 = self.up4(x15, x1, t)
+    x17 = self.conv9(x16)
+    return self.out(x17)   
+```
+
+### 2e. Adding a sinusoidal timestep position encoding
+
+One final thing we can do to improve performance is to add a sinusoidal timestep position encoding before passing it into the model. I won't delve too much into this here because it isn't the focus of the article, but here is a function which does this from [this repo which I linked before](https://github.com/dome272/Diffusion-Models-pytorch/blob/main/modules.py#L128):
+
+```python
+def pos_encoding(self, t, channels):
+  inv_freq = 1.0 / (
+      10000
+      ** (torch.arange(0, channels, 2, device=self.device).float() / channels)
+  )
+  pos_enc_a = torch.sin(t.repeat(1, channels // 2) * inv_freq)
+  pos_enc_b = torch.cos(t.repeat(1, channels // 2) * inv_freq)
+  pos_enc = torch.cat([pos_enc_a, pos_enc_b], dim=-1)
+  return pos_enc
+```
+Integrating this into our implementation, we get:
+
+```python
+class UNet(nn.Module):
+  def __init__(self):
+    super().__init__()
+    self.conv1 = DoubleConv(1, 64)
+    self.down1 = Down(64, 64)
+    self.conv2 = DoubleConv(64, 128)
+    self.down2 = Down(128, 128)
+    self.conv3 = DoubleConv(128, 256)
+    self.down3 = Down(256, 256)
+    self.conv4 = DoubleConv(256, 512)
+    self.down4 = Down(512, 512)
+    self.conv5 = DoubleConv(512, 1024)
+    self.up1 = Up(1024, 1024)
+    self.conv6 = DoubleConv(1024, 512)
+    self.up2 = Up(512, 512)
+    self.conv7 = DoubleConv(512, 256)
+    self.up3 = Up(256, 256)
+    self.conv8 = DoubleConv(256, 128)
+    self.up4 = Up(128, 128)
+    self.conv9 = DoubleConv(128, 64)
+    self.out = nn.Conv2d(64, 1, 1)
+  def pos_encoding(self, t, channels):
+    inv_freq = 1.0 / (
+        10000
+        ** (torch.arange(0, channels, 2, device=self.device).float() / channels)
+    )
+    pos_enc_a = torch.sin(t.repeat(1, channels // 2) * inv_freq)
+    pos_enc_b = torch.cos(t.repeat(1, channels // 2) * inv_freq)
+    pos_enc = torch.cat([pos_enc_a, pos_enc_b], dim=-1)
+    return pos_enc
+  def forward(self, x, t):
+    t = t.unsqueeze(-1).type(torch.float)
+    t = self.pos_encoding(t, self.time_dim)
+    x1 = self.conv1(x)
+    x2 = self.down1(x1, t)
+    x3 = self.conv2(x2)
+    x4 = self.down2(x3, t)
+    x5 = self.conv3(x4)
+    x6 = self.down3(x5, t)
+    x7 = self.conv4(x6)
+    x8 = self.down4(x7, t)
+    x9 = self.conv5(x8)
+    x10 = self.up1(x9, x7, t)
+    x11 = self.conv6(x10)
+    x12 = self.up2(x11, x5, t)
+    x13 = self.conv7(x12)
+    x14 = self.up3(x13, x3, t)
+    x15 = self.conv8(x14)
+    x16 = self.up4(x15, x1, t)
+    x17 = self.conv9(x16)
+    return self.out(x17)   
+```
+
+Whew! That was a lot, but now we are mostly finished.
+
+## Training the model
+
+I won't write out the entire training loop here, since I won't be going over the data step, but basically given a batch of images, the way you train the model is:
+
+1. sample random timesteps to generate images for
+2. add noise to the images to these timesteps
+3. predict the noise using the UNet
+4. calculate the loss
+
+Here's how you would do this given a batch of images, `images`:
+
+```python
+model = UNet()
+optimizer = optim.AdamW(model.parameters(), lr = 1e-4)
+MAX_STEPS = 1000
+mse = nn.MSELoss() #l2 loss
+t = torch.randint((low=1, high=MAX_STEPS), size = (images.shape[0],)) # generate B random timesteps
+x_t, noise = get_noised_images(images, t)
+pred = model(x_t, t)
+loss = mse(noise, pred)
+optimizer.zero_grad()
+loss.backward()
+optimizer.step()
+```
+
+# Final Thoughts
+
+Diffusion models have become a lot more well known after the introduction of stable diffusion as well as their use in Dalle-2. Another interesting fact is that diffusion models (specifically conditional diffusion models) are being used in policy learning in robotics for their ability to generate diverse samples based on a training distribution.
+
+<img width="50%" alt="image" src="https://github.com/user-attachments/assets/d031d5b2-9f25-490a-b0b5-37998e89a21c">
+
+One advantage of diffusion models versus the other popular alternative for image synthesis, GANs, is that the training process is much more stable. Additionally, diffusion models can be conditional, which means that their generations are conditioned on some input such as text or a lower resolution image. This allows for diffusion to be used for a lot of different tasks such as inpainting, super-resolution, and text-to-image.
+
+That's it for this article---hope you learned something, and thanks for reading!
 
