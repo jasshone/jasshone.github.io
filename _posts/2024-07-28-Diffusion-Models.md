@@ -422,7 +422,7 @@ dataset = torchvision.datasets.MNIST(root="mnist/", train=True, download=True, t
 train_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 ```
 
-Now, with this, we can create a full training loop! (Adapted from (here)[https://colab.research.google.com/github/huggingface/diffusion-models-class/blob/main/unit1/02_diffusion_models_from_scratch.ipynb#scrollTo=6MW0xsLGNrXL])
+Now, with this, we can create a full training loop! (Adapted from [here](https://colab.research.google.com/github/huggingface/diffusion-models-class/blob/main/unit1/02_diffusion_models_from_scratch.ipynb#scrollTo=6MW0xsLGNrXL))
 
 ```python
 
