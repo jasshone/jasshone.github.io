@@ -282,18 +282,19 @@ class UNet(nn.Module):
     self.down3 = Down(256, 256)
     self.conv4 = DoubleConv(256, 512)
     self.down4 = Down(512, 512)
-    self.conv5 = DoubleConv(512, 1024)
-    self.up1 = Up(1024, 1024)
-    self.conv6 = DoubleConv(1024, 512)
-    self.up2 = Up(512, 512)
-    self.conv7 = DoubleConv(512, 256)
-    self.up3 = Up(256, 256)
-    self.conv8 = DoubleConv(256, 128)
-    self.up4 = Up(128, 128)
-    self.conv9 = DoubleConv(128, 64)
-    self.out = nn.Conv2d(64, 1, 1)
+    self.conv5 = DoubleConv(512, 512)
+    self.up1 = Up(1024, 512)
+    self.conv6 = DoubleConv(512, 256)
+    self.up2 = Up(512, 256)
+    self.conv7 = DoubleConv(256, 128)
+    self.up3 = Up(256, 128)
+    self.conv8 = DoubleConv(128, 64)
+    self.up4 = Up(128, 64)
+    self.out = nn.Conv2d(64, 1, kernel_size = 1)
   
   def forward(self, x, t):
+    t = t.unsqueeze(-1).type(torch.float)
+    t = self.pos_encoding(t, 256)
     x1 = self.conv1(x)
     x2 = self.down1(x1, t)
     x3 = self.conv2(x2)
@@ -310,8 +311,8 @@ class UNet(nn.Module):
     x14 = self.up3(x13, x3, t)
     x15 = self.conv8(x14)
     x16 = self.up4(x15, x1, t)
-    x17 = self.conv9(x16)
-    return self.out(x17)   
+    
+    return self.out(x16)
 ```
 
 ### 2e. Adding a sinusoidal timestep position encoding
@@ -343,20 +344,20 @@ class UNet(nn.Module):
     self.down3 = Down(256, 256)
     self.conv4 = DoubleConv(256, 512)
     self.down4 = Down(512, 512)
-    self.conv5 = DoubleConv(512, 1024)
-    self.up1 = Up(1024, 1024)
-    self.conv6 = DoubleConv(1024, 512)
-    self.up2 = Up(512, 512)
-    self.conv7 = DoubleConv(512, 256)
-    self.up3 = Up(256, 256)
-    self.conv8 = DoubleConv(256, 128)
-    self.up4 = Up(128, 128)
-    self.conv9 = DoubleConv(128, 64)
-    self.out = nn.Conv2d(64, 1, 1)
+    self.conv5 = DoubleConv(512, 512)
+    self.up1 = Up(1024, 512)
+    self.conv6 = DoubleConv(512, 256)
+    self.up2 = Up(512, 256)
+    self.conv7 = DoubleConv(256, 128)
+    self.up3 = Up(256, 128)
+    self.conv8 = DoubleConv(128, 64)
+    self.up4 = Up(128, 64)
+    self.out = nn.Conv2d(64, 1, kernel_size = 1)
+
   def pos_encoding(self, t, channels):
     inv_freq = 1.0 / (
         10000
-        ** (torch.arange(0, channels, 2, device=self.device).float() / channels)
+        ** (torch.arange(0, channels, 2, device=device).float() / channels)
     )
     pos_enc_a = torch.sin(t.repeat(1, channels // 2) * inv_freq)
     pos_enc_b = torch.cos(t.repeat(1, channels // 2) * inv_freq)
@@ -364,7 +365,7 @@ class UNet(nn.Module):
     return pos_enc
   def forward(self, x, t):
     t = t.unsqueeze(-1).type(torch.float)
-    t = self.pos_encoding(t, self.time_dim)
+    t = self.pos_encoding(t, 256)
     x1 = self.conv1(x)
     x2 = self.down1(x1, t)
     x3 = self.conv2(x2)
@@ -381,15 +382,16 @@ class UNet(nn.Module):
     x14 = self.up3(x13, x3, t)
     x15 = self.conv8(x14)
     x16 = self.up4(x15, x1, t)
-    x17 = self.conv9(x16)
-    return self.out(x17)   
+    
+    return self.out(x16)
+
 ```
 
 Whew! That was a lot, but now we are mostly finished.
 
-## Training the model
+## Part 3 Training the model
 
-I won't write out the entire training loop here, since I won't be going over the data step, but basically given a batch of images, the way you train the model is:
+Given a batch of images, the way you train the model is:
 
 1. sample random timesteps to generate images for
 2. add noise to the images to these timesteps
@@ -412,6 +414,65 @@ loss.backward()
 optimizer.step()
 ```
 
+To get batches of images, we can use the MNIST dataset and load it into a Dataloader.
+
+```python
+import torchvision
+dataset = torchvision.datasets.MNIST(root="mnist/", train=True, download=True, transform=torchvision.transforms.ToTensor())
+train_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+```
+
+Now, with this, we can create a full training loop! (Adapted from (here)[https://colab.research.google.com/github/huggingface/diffusion-models-class/blob/main/unit1/02_diffusion_models_from_scratch.ipynb#scrollTo=6MW0xsLGNrXL])
+
+```python
+
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
+from torch.utils.data import DataLoader
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+batch_size = 128
+train_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+n_epochs = 3
+
+net = UNet()
+net.to(device)
+
+loss_fn = nn.MSELoss()
+
+opt = torch.optim.Adam(net.parameters(), lr=1e-3)
+
+losses = []
+
+for epoch in range(n_epochs):
+
+    for x, y in train_dataloader:
+
+        x = x.to(device)
+        x = F.interpolate(x, (32, 32))
+        t = torch.randint(0, 1000, (x.shape[0],)).to(device) # Random timesteps
+        x_t, noise = get_noised_images(x, t, alpha_hat) 
+        #print(x_t.shape)
+
+        pred = net(x_t,t)
+
+        loss = loss_fn(pred, x) 
+
+        opt.zero_grad()
+        loss.backward()
+        opt.step()
+
+        losses.append(loss.item())
+
+    # Print our the average of the loss values for this epoch:
+    avg_loss = sum(losses[-len(train_dataloader):])/len(train_dataloader)
+    print(f'Finished epoch {epoch}. Average loss for this epoch: {avg_loss:05f}')
+
+# View the loss curve
+plt.plot(losses)
+plt.ylim(0, 0.1);
+```
 # Final Thoughts
 
 Diffusion models have become a lot more well known after the introduction of stable diffusion as well as their use in Dalle-2. Another interesting fact is that diffusion models (specifically conditional diffusion models) are being used in policy learning in robotics for their ability to generate diverse samples based on a training distribution.
