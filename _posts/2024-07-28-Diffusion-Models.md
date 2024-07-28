@@ -492,5 +492,5 @@ Diffusion models have become a lot more well known after the introduction of sta
 
 One advantage of diffusion models versus the other popular alternative for image synthesis, GANs, is that the training process is much more stable. Additionally, diffusion models can be conditional, which means that their generations are conditioned on some input such as text or a lower resolution image. This allows for diffusion to be used for a lot of different tasks such as inpainting, super-resolution, and text-to-image.
 
-That's it for this article---hope you learned something, and thanks for reading!
+That's it for this article—hope you learned something, and thanks for reading!
 
