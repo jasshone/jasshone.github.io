@@ -32,8 +32,8 @@ It can be derived from the fact that the probability that `A` is true given `B` 
 
 The goal of a diffusion model is to denoise noise to obtain the original input. In terms of Bayes Rule, that means that we want to know the probability of `A`, the original input, given the noise `B`. However, it's a bit easier than that, since we can just try to learn each individual step of denoising.
 
-To formalize this a bit more, we can call the approximate posterior of this model $q(x_{1:T}|x_0)$ where $x_1,...x_T$ are the transformed input at each noising timestep and `x0` is the original input.
-We then want to learn $p_\theta(x_{t-1} | x_t)$, or the probability that the image before the most recent noising episode was $x_{t-1}$ given that we currently have transformed input $x_{t}$.
+To formalize this a bit more, we can call the approximate posterior of this model $`q(x_{1:T}|x_0)`$ where $`x_1,...x_T`$ are the transformed input at each noising timestep and `x0` is the original input.
+We then want to learn $`p_\theta(x_{t-1} | x_t)`$, or the probability that the image before the most recent noising episode was $`x_{t-1}`$ given that we currently have transformed input $`x_{t}`$.
 
 <img width="90%" alt="image" src="https://github.com/user-attachments/assets/9b8ab9df-f16f-4e5d-9f43-b6d10f30f7e8">
 
@@ -66,9 +66,9 @@ Or specifically denoting the noised distribution of $x$ with mean $\mu$ and stan
 
 <img width="80%" alt="image" src="https://github.com/user-attachments/assets/e49ef22b-d44d-4cd3-ada3-0d8f62fdf86b">
 
-To understand this proof, you would need some background in probability, but in practice this theory doesn't matter too much in the implementation of a diffusion model.
+To understand this proof, you would need some background in probability. I think the general idea of why we need this proof and why it makes sense is that in the diffusion model training process, we want to not have to add noise step by step and skip straight to the current timestep t, and have the model predict the noise difference between that noised image and the original image. This works fine for training because of the property of the sum of two normal distributions being another normal distribution, so we can approximate the effect of t steps of adding noise by one gaussian distribution with the same mean and standard deviation as the sum of the guassian noise added per step up to step t. 
 
-The actual paper has some additional parameters, specifically beta, beta tilde, alpha, alpha bar, etc. These are chosen contingent on beta, which is the amount of noise to add at each step.
+The actual paper has some additional parameters, specifically beta, beta tilde, alpha, alpha bar, etc. These are chosen contingent on beta, which is the amount of noise to add at each step. We will talk about these more later when we actually implement the model.
 
 ## Training the Model (+ some more math)
 
