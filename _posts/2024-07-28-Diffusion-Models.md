@@ -92,11 +92,11 @@ One repo I found particularly helpful was [this repo by Dominic Rampas](https://
 ## Part 0: Notation
 
 First, let's go over some important variables and their meanings. 
-$\beta_t$ or beta at timestep t: the amount of noise to add at the given timestep, determined by a scheduler.
+$`\beta_t`$ or beta at timestep t: the amount of noise to add at the given timestep, determined by a scheduler.
 
-$\alpha_t$ or alpha at timestep t: $1-\beta_t$
+$`\alpha_t`$ or alpha at timestep t: $`1-\beta_t`$
 
-$\bar{\alpha}_t$, or alpha hat: product of all alpha values from the first timestep to timestep `t`
+$`\bar{\alpha}_t`$, or alpha hat: product of all alpha values from the first timestep to timestep `t`
 
 ## Part 1: Noise
 
@@ -126,7 +126,7 @@ Now that we have these values, we can get the noised images at a specific timest
 
 to get
 
-$x_t = \sqrt{\bar{a}_t} * x_0 + \sqrt{1-\bar{a}_t}*\mathcal{E}$ where $`\mathcal{E}`$ is the gaussian noise.
+$`x_t = \sqrt{\bar{a}_t} * x_0 + \sqrt{1-\bar{a}_t}*\mathcal{E}`$ where $`\mathcal{E}`$ is the gaussian noise.
 
 
 Let's implement this in code.
