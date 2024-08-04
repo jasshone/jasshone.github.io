@@ -1,4 +1,9 @@
-# Diffusion Models
+---
+title: "Diffusion Models from Scratch"
+tags: ["Architecture Implementation"]
+---
+
+# Diffusion Models from Scratch
 
 My original plans were to make a post about some papers in RL first, but I got busy this week and the need to understand diffusion models got more relevant for my research. Therefore, I will be talking about Diffusion Models instead in this post.
 
