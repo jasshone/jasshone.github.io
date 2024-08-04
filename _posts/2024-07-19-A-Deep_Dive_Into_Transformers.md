@@ -1,6 +1,6 @@
 ---
 title: "A Deep Dive Into Transformers"
-tags: ["Architecture-Implementation"]
+tags: ["Architecture Implementation"]
 ---
 # A Deep Dive Into Transformers
 <img width="40%" alt="image" src="https://github.com/user-attachments/assets/df39c467-c620-489b-a167-512b41c52d64">
