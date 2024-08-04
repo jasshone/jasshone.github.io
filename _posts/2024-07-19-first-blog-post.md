@@ -1,3 +1,8 @@
+---
+title: "First Blog Post!"
+tags: ["Other"]
+---
+
 ## First Blog Post!
 <img width="100%" alt="celebrate" src="https://github.com/user-attachments/assets/0c9313be-9e30-4038-97be-4ee5dd98c7b4">
 
