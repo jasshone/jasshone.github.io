@@ -1,3 +1,8 @@
+---
+title: "Multimodal/Contrastive Learning, or CLIP from Scratch"
+tags: ["Architecture Implementation"]
+---
+
 # Multimodal/Contrastive Learning, or CLIP from Scratch
 
 Now that we've gone over text transformers and vision transformers, I wanted to move on to CLIP which is text-image pairs. In hindsight, this paper really is a natural follow-up to both, since it uses both a text and vision transformer as components. I will be referencing Learning Transferable Visual Models From Natural Language Supervision by Radford et al. 2021 for my implementation.
