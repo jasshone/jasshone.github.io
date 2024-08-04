@@ -1,3 +1,8 @@
+---
+title: "Diffusion Models from Scratch"
+tags: ["Paper Summary"]
+---
+
 # Diffusion Policy in Robotic Learning
 
 I wanted to write this blog as a follow up to my previous blog about diffusion models. 
