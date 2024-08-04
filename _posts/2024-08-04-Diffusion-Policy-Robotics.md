@@ -33,13 +33,14 @@ This first paper is a predecessor to the second paper. A lot of the second paper
 ### Reinforcement Learning as Guided Sampling
 
 - To solve RL problems with Diffuser, reward has to be incorporated somehow.
-- The idea is to train a separate network for reward whose gradients is used as conditioning for the gradient
+- The idea of this method of adding reward is to train a separate network for reward whose gradients is used as conditioning for the gradient
 - This means adding the sum of the gradients to the predicted noise.
 
 ### Goal-Conditioned RL as Inpainting
 
 - In image diffusion, inpainting is when the model learns to fill in missing parts of the image.
 - The claim is that this can be transitioned into goal-conditioned RL because the goal is to predict a trajectory given state and action constraints, and future state and action constraints may be unobserved (like unobserved pixels in an image) and must be filled in by the diffusion model.
+- The idea of this method is to condition on future state and action constraints
 
 ## Properties of Diffusion Planners
 
@@ -57,7 +58,28 @@ The goal is to evaluate 1. the ability to plan over long horizons, 2. ability to
 - They evaluate this in the Maze2D environment where a reward of 1 is given only after you finish traversing a trajectory.
 - using the inpainting strategy with diffuser achieves higher score than a reference expert policy
 - Diffuser also performs well in a multi-task planner setting in Multi2D because it can just be guided by different reward networks and do fine.
-  
+- In contrast, even the best model-free algorithm drops significantly in performance when a single-task model is applied to a multi-task dataset
+
+### Test-time flexibility
+
+- They create three block stacking tasks: (1) Unconditional stacking, which is building a block tower that is as tall as possible (2) Conditional stacking, which is to construct a block tower with a specified order of blocks, and (3) rearrangement, which is to match a set of reference blocks' locations in a novel arrangement.
+- The first task has no conditioning/perturbation function, the second and third condition on maximizing the likelihood of the trajectory's final state matching the goal configuration, and a contact constraint between the end effector and a cubeduring stacking motions.
+- Diffuser outperforms prior methods
+
+### Offline RL
+
+- Both inpainting and sampling are used
+- performance is better than other general-purpose RL techniques but worse than the best offline techniques for single-task performance
+- trying Diffuser + a conventional trajectory optimizer found that the combination performed no better than random, so the effectiveness of Diffuser is from the coupled modeling and planning.
+
+### Warm-Starting Diffusion for Faster Planning
+
+- The intuition is to use past plans for new plans at later timesteps to avoid computational cost
+- this can be done by running a limited number of forward diffusion steps and then a corresponding number of denoising steps to get an updated plan.
+
+
+# Paper 2: Diffusion Policy: Visuomotor Policy Learning via Action Diffusion
+
 ## Introduction
 
 - Policy learning from demonstration is basically learning how to, from some observations of a scene, convert that into appropriate actions.
@@ -114,4 +136,34 @@ Fig 3 illustrates the overall pipeline.
 ## Key Design Decisions
 
 ### Network Architecture
+
+- They try the 1D temporal CNN from the first paper with a few modifications:
+  - They only model the conditional distribution with Feature-wise Linear Modulation (another influential paper, may write a blog about this later) and the iteration of denoising $`k`$.
+  - They only predict the action trajectory instead of the observation-action trajectory
+  - They removed inpainting-based goal state conditioning due to incompatibility with the receding prediction horizon framework.
+  - It worked well on most tasks but it performed poorly when the desired action sequence changes quickly and sharply through time such as velocity command
+
+- They then try a new transformer architecture in which actions with noise are passed as input tokens for transformer decoder blocks, with the sinusoidal embedding for the iteration k of diffusion prepended as the first token.
+  - The observation is transformed using an MLP to an observation embedding sequence, and then passed to the transformer decoder stack
+  - The gradient for each timestep is predicted by each corresponding output token of the decoder stack
+  - The performance was better than the CNN but more sensitive to hyperparameters
+ 
+  ### Visual Encoder
+  
+  - visual encoder maps raw image sequence to a latent embedding and is trained end-to-end with the diffusion policy. Different camera view use separate encoders and images in each timestep are encoded independently.
+  - ResNet-18 architecture was used as the encoder, with the modifications of replacing the global average pooling with a spatial softmax pooling to maintain spatial info, and replacing BatchNorm with GroupNorm.
+ 
+  ### Noise Schedule + Inference
+  
+  - Noise schedule is important for better representing action signal change frequency, and they find that Square Cosine Schedule gives them the best performance
+  - They use the same trick as the original diffusion paper to denoise multiple steps at a time for faster inference
+ 
+  ## Intriguing Properties of Diffusion Policy
+
+  - Modelling multi-modal action distributions, through having sampling/randomness enable multiple correct solutions to be represented
+  - Synergy with Position Control, or that it works better with predicting positions than velocity.
+  - Benefits of action-sequence prediction: or the diffusion model being able to express variable length sequences well without compromising expressiveness of the model.
+    - if there are multimodal distributions for the correct action, other models with only one timestep of prediction could switch between different solutions.
+    - Idle actions sometimes occur where demonstrations are paused. Models with only predictions in a single timestep forward can overfit to this pausing behavior.
+  
 
