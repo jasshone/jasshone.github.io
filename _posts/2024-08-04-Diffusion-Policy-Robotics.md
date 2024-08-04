@@ -36,13 +36,16 @@ In addition to introducing diffusion policy to robotics, the authors also state 
 - Like we discussed in the previous blog, the model learns to predict the difference in noise between the image at timestep k and k-1, and in doing so, learns to denoise the image.
 - Another way of stating this is as follows:
 <img width="187" alt="image" src="https://github.com/user-attachments/assets/f0d7e8c4-7760-466a-8b15-fd29e03821b6">
-where $`\Epsilon_{\theta}(x, k)`$ or the noise prediction network, predicts the gradient field $`\Delta E(x)`$ and $`\gamma`$ is the learning rate. 
+where $`\Epsilon_{\theta}(x, k)`$ or the noise prediction network, predicts the gradient field $`\Delta E(x)`$ and $`\gamma`$ is the learning rate.
+
 ### B. DDPM Training
 - Like we found in the previous blog, the training is basically choosing a timestep, adding random Gaussian noise with variance which is correct for timestep t, and then asking the model to predict the noise.
 - The reason why L2 or MSE is used is because minimizing this loss minimizes the variational lower bound of the KL divergence, which is a measure of how different two distributions are. We want to minimize the KL divergence between the actual noise and the predicted noise.
+
 ### Diffusion for Visuomotor Policy learning
 - The two major modifications made for robot learning is 1. changing the output to represent robot actions 2. making the denoising process conditioned on the input observation `O`.
-- The authors add closed-loop action-sequence prediction, which means that at time step $`t`$ the policy takes the last $`T_O`$ steps of observation data as input and predicts $`T_p`$ steps of actions, of which $`T_a`$ steps of actions are executed without re-planning.
+- The authors add closed-loop action-sequence prediction, which means that at time step $t$ the policy takes the last
+$`T_O`$ steps of observation data as input and predicts $`T_p`$ steps of actions, of which $`T_a`$ steps of actions are executed without re-planning.
 - In other terms, $`T_O`$ is the observation horizon, $`T_p`$ is the action prediction horizon, and $`T_a`$ is the action execution horizon.
 - The idea behind this is to take into account more of the past and action sequences, predict into the future (to allow for more long-term planning), and allow for changes to be made if necessary (by making a shorter action execution horizon than the prediction horizon)
 
