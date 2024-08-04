@@ -114,7 +114,7 @@ In addition to introducing diffusion policy to robotics, the authors also state 
 - Another way of stating this is as follows:
 <img width="40%" alt="image" src="https://github.com/user-attachments/assets/f0d7e8c4-7760-466a-8b15-fd29e03821b6">
 
-where $`\varepsilon_{\theta}(x, k)`$ or the noise prediction network, predicts the gradient field $`\Delta E(x)`$ and $`\gamma`$ is the learning rate.
+where $\varepsilon_{\theta}(x, k)$ or the noise prediction network, predicts the gradient field $\Delta E(x)$ and $\gamma$ is the learning rate.
 
 ### B. DDPM Training
 - Like we found in the previous blog, the training is basically choosing a timestep, adding random Gaussian noise with variance which is correct for timestep t, and then asking the model to predict the noise.
@@ -123,8 +123,8 @@ where $`\varepsilon_{\theta}(x, k)`$ or the noise prediction network, predicts t
 ### Diffusion for Visuomotor Policy learning
 - The two major modifications made for robot learning is 1. changing the output to represent robot actions 2. making the denoising process conditioned on the input observation $`O`$.
 - The authors add closed-loop action-sequence prediction, which means that at time step $t$ the policy takes the last
-$`T_O`$ steps of observation data as input and predicts $`T_p`$ steps of actions, of which $`T_a`$ steps of actions are executed without re-planning.
-  - In other terms, $`T_O`$ is the observation horizon, $`T_p`$ is the action prediction horizon, and $`T_a`$ is the action execution horizon.
+  $T_O$ steps of observation data as input and predicts $T_p$ steps of actions, of which $T_a$ steps of actions are executed without re-planning.
+  - In other terms, $T_O$ is the observation horizon, $T_p$ is the action prediction horizon, and $T_a$ is the action execution horizon.
   - The idea behind this is to take into account more of the past and action sequences, predict into the future (to allow for more long-term planning), and allow for changes to be made if necessary (by making a shorter action execution horizon than the prediction horizon)
 - The authors use a DDPM to approximate the conditional distribution of actions given observations instead of the joint distribution of actions and observations. This leads the model to be able to predict actions without needing to also predict future observations resulting from the actions, which decreases compute
   - Additionally, conditioning on observations allows for the visual encoder to be trained end-to-end, which will be discussed in more detail later.
@@ -138,7 +138,7 @@ Fig 3 illustrates the overall pipeline.
 ### Network Architecture
 
 - They try the 1D temporal CNN from the first paper with a few modifications:
-  - They only model the conditional distribution with Feature-wise Linear Modulation (another influential paper, may write a blog about this later) and the iteration of denoising $`k`$.
+  - They only model the conditional distribution with Feature-wise Linear Modulation (another influential paper, may write a blog about this later) and the iteration of denoising $k$.
   - They only predict the action trajectory instead of the observation-action trajectory
   - They removed inpainting-based goal state conditioning due to incompatibility with the receding prediction horizon framework.
   - It worked well on most tasks but it performed poorly when the desired action sequence changes quickly and sharply through time such as velocity command
@@ -165,5 +165,26 @@ Fig 3 illustrates the overall pipeline.
   - Benefits of action-sequence prediction: or the diffusion model being able to express variable length sequences well without compromising expressiveness of the model.
     - if there are multimodal distributions for the correct action, other models with only one timestep of prediction could switch between different solutions.
     - Idle actions sometimes occur where demonstrations are paused. Models with only predictions in a single timestep forward can overfit to this pausing behavior.
-  
+  - Diffusion models are more stable to train than energy-based intrinsic models.
 
+  ## Evaluation
+
+  - Diffusion Policy is evaluated on a suite of robot learning tasks which include simulation tasks (e.g. BlockPush) and real world tasks (e.g. Push-T)
+  - Key findings:
+    - Diffusion Policy can express short-horizon multimodality (multiple ways of achieving the same immediate goal) and does it better than other methods
+    - Diffusion Policy can express long-horizon multimodality, or the completion of different sub-goals in different orders, better than other models
+    - Diffusion Policy can better leverage position control than velocity control. The baselines they compare with work best with velocity control, and so does most of literature.
+    - A longer action horizon helps policy predict consistent actions and compensate for idle portions of the demonstration, but too long a horizon reduces performance due to slow reaction time.
+    - Robustness against latency: receding horizon position control helps reduce latency gap by image processing, policy inference, and network delay.
+    - stable to train: optimal hyperparameters are mostly consistent across tasks, vs energy-based intrinsic models.
+   
+  ### Real World Eval
+  - They found that the CNN variant with end-to-end vision encoders performed better
+  - In the Push-T task, where the model must push a "T" object into a specific configuration, they found that diffusion policy is robust to perturbations, such as waving a hand in front of the camera, shifting the object, and moving the object after the task was complete but the robot was still moving to the end-zone. This indicates that diffusion policy may be able to synthesize novel behavior in response to unseen observations.
+  - In the Mug Flipping task, they found that diffusion policy is better able to handle complex 3D rotations which are highly multimodal compared to an LSTM-GMM policy
+  - In the Sauce Pouring and Spreading task, they found that diffusion policy is better able to work with non-rigid objects, high-dimensional action spaces, and periodic actions (with idle periods).
+
+
+# Conclusions and Thoughts
+
+These were very information dense papers and had a lot of high quality observations and analysis. I will likely reread them at some point and try to understand them even further; this was a really great read and I learned a lot. Thanks for reading, and see you in the next blog!
