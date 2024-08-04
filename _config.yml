@@ -39,4 +39,4 @@ defaults:
       path: ""
       type: post
     values:
-      tags: Architecture Implementation, Paper Summary, Other
+      tags: Architecture-Implementation, Paper-Summary, Other
