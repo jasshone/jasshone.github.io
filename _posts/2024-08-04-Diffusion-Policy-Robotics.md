@@ -9,7 +9,7 @@ I wanted to write this blog as a follow up to my previous blog about diffusion m
 The papers I will be referencing are: 
 https://arxiv.org/pdf/2205.09991, https://arxiv.org/pdf/2303.04137v4. I will be summarizing both papers by section, since they build upon each other.
 
-# Paper 1: Planning with Diffusion for Flexible Behavior Synthesis by Janner et al.
+## Paper 1: Planning with Diffusion for Flexible Behavior Synthesis by Janner et al.
 
 This first paper is a predecessor to the second paper. A lot of the second paper is trying to further improve the first paper's ideas.
 
@@ -83,7 +83,7 @@ The goal is to evaluate 1. the ability to plan over long horizons, 2. ability to
 - this can be done by running a limited number of forward diffusion steps and then a corresponding number of denoising steps to get an updated plan.
 
 
-# Paper 2: Diffusion Policy: Visuomotor Policy Learning via Action Diffusion
+## Paper 2: Diffusion Policy: Visuomotor Policy Learning via Action Diffusion
 
 ## Introduction
 
