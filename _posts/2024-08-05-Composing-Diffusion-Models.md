@@ -1,6 +1,6 @@
 ---
-Title: Composing Diffusion Models
-Tags: ['Paper Summary']
+title: Composing Diffusion Models
+tags: ['Paper Summary']
 ---
 
 # Composing Diffusion Models
