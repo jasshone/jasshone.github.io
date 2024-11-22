@@ -18,7 +18,8 @@ I have experience building projects in Computer Vision, NLP, medical ML, deep le
 
 ## News
 
-- The project I did over the summer received the Best Paper award at the CoRL LangRob Workshop! https://fang-xiaolin.github.io/KALM/
+- I'm headed to the HRT Women in Trading and Technology Internship this winter
+- My summer robotics research project received the Best Paper award at the CoRL LangRob Workshop! https://fang-xiaolin.github.io/KALM/
 - We won the Bun sponsor track at HackMIT for a fast interpreter we built for the Brainf*ck programming language
 
 
