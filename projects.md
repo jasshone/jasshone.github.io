@@ -2,9 +2,12 @@
 
 Here's a list and short description of some of my past projects. 
 
-### Royr: generalizable imitation learning with robot memory and object-based priors. (In Progress)
+### Generative Visual Communication
+I helped out with running an LLM pipeline for human-LLM communication through sketching by adding Llama 3 90b Vision support. I learned about quantization, parallel GPU inference, and performance optimization.
 
-We aim to use object-based methods to improve imitation learning to address challenges in learning from real-world data such as different camera viewpoints, object task relevance, background changes, and occlusion. My contribution so far has focused on implementing an object-oriented diffusion policy pipeline, utilizing embeddings from vision foundation models (Dino V2, CLIP, Theia) and Pointnet++ for point clouds, RPN/Segment Anything, and object-wise attention/transformer
+### KALM: [Keypoint Abstraction using Large Models for Object-Relative Imitation Learning](https://fang-xiaolin.github.io/KALM/)
+
+In this paper, we propose KALM, a framework that leverages large pre-trained vision-language models (LMs) to automatically generate task-relevant and cross-instance consistent keypoints. KALM distills robust and consistent keypoints across views and objects by generating proposals using LMs and verifies them against a small set of robot demonstration data. Based on the generated keypoints, we can train keypoint-conditioned policy models that predict actions in keypoint-centric frames, enabling robots to generalize effectively across varying object poses, camera views, and object instances with similar functional shapes. Our method demonstrates strong performance in the real world, adapting to different tasks and environments from only a handful of demonstrations while requiring no additional labels.
 
 ### [Validating the Usage of Stable Diffusion Foundational Models on Generating Glaucoma Fundus Images in Low-Data Settings](https://acrobat.adobe.com/link/review?uri=urn:aaid:scds:US:f78e6cbf-f195-40d7-ab1a-481e2511a80b)
 
