@@ -1,3 +1,8 @@
+---
+title: "Diffusion Policy Presentation"
+tags: ["Other"]
+---
+
 ### Diffusion Policy Presentation
 I gave a presentation on diffusion policy a while back for an AI reading group -- it goes over the main intuitions behind diffusion in RL/imitation learning, as well as some brief information on my summer project.
 
