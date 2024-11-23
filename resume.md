@@ -18,7 +18,7 @@
 - Investigating novel methods for contrastive learning
 
 # Torralba Lab @ MIT CSAIL, Cambridge, MA | AI Research Intern
-- Investigating AI-LLM communication and LLM representations of concepts like cats or ballerinas through the medium of sketches
+- Investigating Human-LLM communication and LLM representations of concepts like cats or ballerinas through the medium of sketches
 - Moving LLM inference pipeline to Llama 90B run on GPU cluster
 - Using quantization, performance optimization, HuggingFace accelerate library
 
@@ -27,7 +27,7 @@
 - Programming novel keypoint-conditioned diffusion policy; evaluating 20+ policy network variants utilizing Linux, PyTorch, HPC to improve robotic generalization; integrating multimodal models utilizing pointcloud encoders, object-wise attention/transformers, and vision foundation models, improving evaluation performance by 27.5%
 - Creating Visual QA keypoint proposal pipeline with SAM segmentation, furthest point sampling, mark-based prompting, nonlinear optimization/rejection sampling (RANSAC)
 
-# Boston Derm Advocate, Cambridge MA | Software Development and ML Intern | 
+# Boston Derm Advocate, Cambridge MA | Software Development and ML Intern 
 - Trained Python machine learning models predicting dermatology product sentiment from 3000+ amazon reviews and ingredient data, narrowing 6680 features to 10 most relevant features using feature selection and improving Random Forest/XGBoost performance by 6.55%.
 - Developed an automated web scraping framework for the PubChem site, facilitating the retrieval of data on 1.11 million compounds; enhanced efficiency by improving ingredient-compound association accuracy by 30%.
 
