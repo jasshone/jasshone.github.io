@@ -140,3 +140,27 @@ span.highlight {
     display: inline-block;
     border-radius: 10px;
 }
+
+.one {                     /* outer wrapper                      */
+  position: relative;
+  width: 100%;             /* or a fixed px width – just be      */
+  max-width: 340px;        /* consistent with the <img> below    */
+}
+
+.one img {                 /* fallback picture                   */
+  width: 100%;
+  display: block;          /* removes the baseline gap           */
+}
+
+.two {                     /* the <div> that holds the <video>   */
+  position: absolute;
+  inset: 0;                /* top:0; right:0; bottom:0; left:0   */
+  opacity: 0;              /* start hidden                       */
+  transition: opacity .2s;
+}
+
+.two video {               /* make the player fill that box      */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;       /* keeps aspect-ratio without gaps    */
+}
