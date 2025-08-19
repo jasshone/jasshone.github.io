@@ -103,7 +103,7 @@
         
         .hero-content {
             display: grid;
-            grid-template-columns: 1fr 300px;
+            grid-template-columns: 1fr 200px;
             gap: 4rem;
             align-items: center;
         }
@@ -117,6 +117,10 @@
             opacity: 0;
             transform: translateY(30px);
             animation: fadeInUp 1s ease 0.2s forwards;
+            background: linear-gradient(90deg, var(--accent), var(--primary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
         
         .hero-text p {
@@ -216,7 +220,7 @@
             left: 0;
             width: 100%;
             height: 3px;
-            background: linear-gradient(90deg, var(--primary), var(--accent));
+            background: linear-gradient(90deg, var(--accent), var(--primary));
             transform: scaleX(0);
             transition: transform 0.8s ease;
         }
@@ -242,18 +246,26 @@
             transition: all 0.3s ease;
             opacity: 0;
             transform: translateY(30px);
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 1.5rem;
+            align-items: start;
         }
-        
+
         .work-item.animate {
             opacity: 1;
             transform: translateY(0);
         }
-        
+
         .work-item:hover {
             transform: translateY(-4px);
             box-shadow: var(--shadow-lg);
         }
-        
+
+        .work-content {
+            grid-column: 2;
+        }
+
         .work-header {
             display: flex;
             justify-content: space-between;
@@ -262,20 +274,20 @@
             flex-wrap: wrap;
             gap: 1rem;
         }
-        
+
         .work-header h3 {
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--dark);
             margin-bottom: 0.25rem;
         }
-        
+
         .work-role {
             color: var(--primary);
             font-weight: 600;
             font-size: 1rem;
         }
-        
+
         .work-date {
             color: var(--text-gray);
             font-weight: 600;
@@ -285,21 +297,96 @@
             border-radius: 20px;
             white-space: nowrap;
         }
-        
+
         .work-item p, .work-item ul {
             color: var(--text-gray);
             line-height: 1.6;
             margin-bottom: 1rem;
         }
-        
+
         .work-item ul {
             padding-left: 1.5rem;
         }
-        
+
         .work-item li {
             margin-bottom: 0.5rem;
         }
-        
+
+        .work-icon {
+            width: 200px;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--light-gray);
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .work-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .work-item:hover .work-icon img {
+            transform: scale(1.1);
+        }
+
+        /* Responsive adjustments for work items */
+        @media (max-width: 968px) {
+            .work-item {
+                grid-template-columns: 80px 1fr;
+                gap: 1.2rem;
+            }
+            
+            .work-content {
+                grid-column: 2;
+            }
+            
+            .work-icon {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .work-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .work-item {
+                grid-template-columns: 1fr;
+                text-align: left;
+            }
+            
+            .work-icon {
+                margin: 0 auto;
+                width: 200px;
+                height: 200px;
+            }
+            
+            .work-content {
+                grid-column: 1;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .work-item {
+                padding: 1.5rem;
+            }
+            
+            .work-icon {
+                width: 80px;
+                height: 80px;
+            }
+        }
+                
         /* Awards */
         .awards-table {
             background: var(--white);
@@ -578,48 +665,66 @@
 
     <!-- Work Experience -->
     <section id="experience">
-        <div class="container">
-            <div class="section-header fade-in-section">
-                <h2>Work Experience</h2>
-                <p>For a full list of my work experiences, please see my <a href="https://www.linkedin.com/in/jasmine-shone-a90853149/" id="linkedin">LinkedIn</a> profile.</p>
+      <div class="container">
+          <div class="section-header fade-in-section">
+              <h2>Work Experience</h2>
+              <p>For a full list of my work experiences, please see my <a href="https://www.linkedin.com/in/jasmine-shone-a90853149/" id="linkedin">LinkedIn</a> profile.</p>
+          </div>
+          
+          <div class="work-item fade-in-section">
+              <div class="work-icon">
+                <img src="images/labubu-edited.png" alt="Meta workplace">
+              </div>
+              <div class="work-content">
+                  <div class="work-header">
+                      <div>
+                          <h3>Meta</h3>
+                          <div class="work-role">Software Engineering Intern</div>
+                      </div>
+                      <div class="work-date">Summer 2025</div>
+                  </div>
+                  <p>Working on new vision model launch at Meta Superintelligence Labs.</p>
+                  <p>Working on large-scale load testing for Instagram. </p>
+              </div>
+              
+          </div>
+          
+          <div class="work-item fade-in-section">
+              <div class="work-icon">
+                  <img src="images/stocks.png" alt="Trading algorithms visualization">
+              </div>
+              <div class="work-content">
+                  <div class="work-header">
+                      <div>
+                          <h3>Hudson River Trading</h3>
+                          <div class="work-role">4-Week Winter Internship in Core (SWE) & Algo Development (QR)</div>
+                      </div>
+                      <div class="work-date">Winter 2025</div>
+                  </div>
+                  <p><strong>Core (SWE):</strong> Completed five C++ projects focused on building infrastructure for live trading systems. Gained hands-on experience with performance optimization techniques, including efficient data structures and memory management. Actively participated in code reviews to improve code quality and robustness.</p>
+                  <p><strong>Algo Development:</strong> Designed, programmed, and deployed a live trading bot for Brazilian equities that achieved net positive returns in production. Applied data science techniques to train predictive models, evaluate performance metrics, and effectively communicate insights to stakeholders.</p>
+              </div>
+              
+          </div>
+          
+          <div class="work-item fade-in-section">
+            <div class="work-icon">
+              <img src="images/robot_square.png" alt="Robotics research at MIT">
             </div>
-            
-            <div class="work-item fade-in-section">
-                <div class="work-header">
-                    <div>
-                        <h3>Meta</h3>
-                        <div class="work-role">Software Engineering Intern</div>
-                    </div>
-                    <div class="work-date">Summer 2025</div>
-                </div>
-                <p>Working on new vision model launch at Meta Superintelligence Labs.</p>
-                <p>Working on scalability for Instagram, utilizing primarily Django and Hack.</p>
-            </div>
-            
-            <div class="work-item fade-in-section">
-                <div class="work-header">
-                    <div>
-                        <h3>Hudson River Trading</h3>
-                        <div class="work-role">4-Week Winter Internship in Core (SWE) & Algo Development (QR)</div>
-                    </div>
-                    <div class="work-date">Winter 2025</div>
-                </div>
-                <p><strong>Core (SWE):</strong> Completed five C++ projects focused on building infrastructure for live trading systems. Gained hands-on experience with performance optimization techniques, including efficient data structures and memory management. Actively participated in code reviews to improve code quality and robustness.</p>
-                <p><strong>Algo Development:</strong> Designed, programmed, and deployed a live trading bot for Brazilian equities that achieved net positive returns in production. Applied data science techniques to train predictive models, evaluate performance metrics, and effectively communicate insights to stakeholders.</p>
-            </div>
-            
-            <div class="work-item fade-in-section">
-                <div class="work-header">
-                    <div>
-                        <h3>Learning and Intelligent Systems Lab @ MIT CSAIL</h3>
-                        <div class="work-role">Research Assistant</div>
-                    </div>
-                    <div class="work-date">Summer 2024</div>
-                </div>
-                <p>Making robots generalize across varying object poses, camera views, and object instances with only 10 demonstrations.</p>
-            </div>
-        </div>
-    </section>
+              <div class="work-content">
+                  <div class="work-header">
+                      <div>
+                          <h3>Learning and Intelligent Systems Lab @ MIT CSAIL</h3>
+                          <div class="work-role">Research Assistant</div>
+                      </div>
+                      <div class="work-date">Summer 2024</div>
+                  </div>
+                  <p>Making robots generalize across varying object poses, camera views, and object instances with only 10 demonstrations.</p>
+              </div>
+              
+          </div>
+      </div>
+  </section>
 
     <!-- Awards -->
     <section id="awards">
@@ -628,6 +733,10 @@
                 <h2>Awards and Accolades</h2>
             </div>
             <div class="awards-table fade-in-section">
+                <div class="awards-row">
+                    <div class="award-year">2025</div>
+                    <div class="award-title">Neo Finalist</div>
+                </div>
                 <div class="awards-row">
                     <div class="award-year">2024</div>
                     <div class="award-title">HackMIT Challenge Track Winner</div>
