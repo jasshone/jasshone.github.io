@@ -1,0 +1,24 @@
+{
+  "name": "jasshone.github.io",
+  "version": "1.0.0",
+  "description": "New personal website, based on Jon Barron's template https://jonbarron.info/",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "live-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jasshone/jasshone.github.io.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jasshone/jasshone.github.io/issues"
+  },
+  "homepage": "https://github.com/jasshone/jasshone.github.io#readme",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}

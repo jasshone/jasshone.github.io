@@ -1,0 +1,56 @@
+[
+    {
+        "title": "A Deep Dive Into Transformers",
+        "date": "2024-07-19",
+        "excerpt": "Exploring the architecture and applications of transformer models.",
+        "link": "posts/2024-07-19-A-Deep_Dive_Into_Transformers.md"
+    },
+    {
+        "title": "First Blog Post",
+        "date": "2024-07-19",
+        "excerpt": "My inaugural blog post introducing this website.",
+        "link": "posts/2024-07-19-first-blog-post.md"
+    },
+    {
+        "title": "Vision Transformer",
+        "date": "2024-07-20",
+        "excerpt": "Applying transformer architecture to computer vision tasks.",
+        "link": "posts/2024-07-20-Vision-Transformer.md"
+    },
+    {
+        "title": "Multimodal Learning CLIP",
+        "date": "2024-07-21",
+        "excerpt": "Understanding CLIP: Connecting text and images through multimodal learning.",
+        "link": "posts/2024-07-21-Multimodal-Learning-CLIP.md"
+    },
+    {
+        "title": "Diffusion Models",
+        "date": "2024-07-28",
+        "excerpt": "Exploring the theory and applications of diffusion models in AI.",
+        "link": "posts/2024-07-28-Diffusion-Models.md"
+    },
+    {
+        "title": "Diffusion Policy Robotics",
+        "date": "2024-08-04",
+        "excerpt": "Applying diffusion models to robotics policy learning.",
+        "link": "posts/2024-08-04-Diffusion-Policy-Robotics.md"
+    },
+    {
+        "title": "Composing Diffusion Models",
+        "date": "2024-08-05",
+        "excerpt": "Techniques for composing and combining diffusion models.",
+        "link": "posts/2024-08-05-Composing-Diffusion-Models.md"
+    },
+    {
+        "title": "Thesis Defense Thoughts",
+        "date": "2024-08-27",
+        "excerpt": "Reflections and insights from my thesis defense experience.",
+        "link": "posts/2024-08-27-Thesis-Defense-Thoughts.md"
+    },
+    {
+        "title": "Diffusion Policy Presentation",
+        "date": "2024-11-23",
+        "excerpt": "Presentation on diffusion policy approaches and implementations.",
+        "link": "posts/2024-11-23-Diffusion-Policy-Presentation.md"
+    }
+]
