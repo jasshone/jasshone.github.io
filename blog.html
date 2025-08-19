@@ -84,7 +84,7 @@
         }
         
         .nav-links a:hover {
-            color: var(--primary);
+            color: var(--accent);
         }
         
         .nav-links a::after {
@@ -225,9 +225,12 @@
             opacity: 0.8;
         }
         a {
-            color: var(--accent);
+            color: var(--primary);
             text-decoration: none;
             transition: color 0.3s ease;
+        }
+        a:hover {
+            color: var(--accent);
         }
         /* Markdown Viewer Modal */
         .modal-overlay {
@@ -449,7 +452,7 @@
     <!-- Navigation -->
     <nav>
         <div class="container">
-            <div class="logo">Jasmine Shone</div>
+            <div class="logo"><a href="index.html">Jasmine Shone</a></div>
             <ul class="nav-links">
                 <li><a href="index.html#experience">Work Experience</a></li>
                 <li><a href="index.html#awards">Awards</a></li>
