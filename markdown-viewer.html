@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Markdown Viewer - Jasmine Shone</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- KaTeX CSS and JS for LaTeX rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -238,6 +242,16 @@
             margin: 2em 0;
         }
         
+        /* KaTeX math styling */
+        .katex-display {
+            margin: 1.5em 0;
+            text-align: center;
+        }
+        
+        .katex {
+            font-size: 1.1em;
+        }
+        
         /* Loading and error states */
         .loading {
             text-align: center;
@@ -328,13 +342,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <p>This website is a modified version of Jon Barron's. <a href="https://github.com/jonbarron/jonbarron_website" style="color: #aaa;">Source code</a>.</p>
-        </div>
-    </footer>
-
     <script>
         // Get the markdown file path from URL parameters
         const urlParams = new URLSearchParams(window.location.search);
@@ -370,6 +377,10 @@
                         ${htmlContent}
                     </article>
                 `;
+                
+                // Render LaTeX math expressions after loading content
+                renderMath();
+                
             } catch (error) {
                 console.error('Error loading markdown:', error);
                 document.getElementById('markdown-container').innerHTML = `
@@ -380,6 +391,32 @@
                     </div>
                 `;
             }
+        }
+        
+        function renderMath() {
+            // Configure KaTeX to render math expressions
+            renderMathInElement(document.getElementById('markdown-container'), {
+                // The list of delimiters to look for math expressions
+                delimiters: [
+                    {left: '$$', right: '$$', display: true},   // Block math
+                    {left: '$', right: '$', display: false},   // Inline math
+                    {left: '\\(', right: '\\)', display: false}, // Alternative inline
+                    {left: '\\[', right: '\\]', display: true}   // Alternative block
+                ],
+                // KaTeX options
+                throwOnError: false,  // Don't break on LaTeX errors
+                errorColor: '#cc0000',
+                strict: false,
+                trust: false,
+                macros: {
+                    // You can define custom LaTeX macros here if needed
+                    "\\RR": "\\mathbb{R}",
+                    "\\NN": "\\mathbb{N}",
+                    "\\ZZ": "\\mathbb{Z}",
+                    "\\QQ": "\\mathbb{Q}",
+                    "\\CC": "\\mathbb{C}"
+                }
+            });
         }
 
         // Load markdown when page is ready

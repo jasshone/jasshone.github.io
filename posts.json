@@ -52,5 +52,12 @@
         "date": "2024-11-23",
         "excerpt": "Presentation on diffusion policy approaches and implementations.",
         "link": "posts/2024-11-23-Diffusion-Policy-Presentation.md"
+    },
+    {
+        "title": "Beyond I-Con: Exploring a New Dimension of Distance Measures in Representation Learning",
+        "date": "2025-09-19",
+        "excerpt": "We achieve state-of-the-art results on clustering and supervised learning by extending the I-Con framework to discover new losses.",
+        "link": "posts/2025-09-19-Beyond-I-Con.md"
     }
+
 ]
