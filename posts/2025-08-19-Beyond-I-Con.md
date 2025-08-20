@@ -67,7 +67,7 @@ Our experiments on CIFAR-10 explored both angular-based and distance-based formu
 
 | Divergence | Angular-based | Distance-based |
 |------------|---------------|----------------|
-| KL | 92.72 / 91.33 | 57.36 / 50.55 |
+| KL | 92.72 / 91.33 | does not converge / does not converge |
 | Total Variation | 85.04 / 81.80 | **96.41** / **97.33** |
 | Hellinger | 89.16 / 87.12 | 92.50 / 91.93 |
 | Jensen-Shannon | 86.69 / 84.03 | 91.83 / 90.99 |
