@@ -77,9 +77,9 @@ Through monitoring training dynamics, we discovered that certain divergence-simi
 
 ![training instability](images/instability.png)
 
-*Training dynamics comparison: Total Variation + Distance (green) maintains stable learning throughout training, while KL Divergence + Distance (red) suffers collapse. Though this example shows collapse around step 1200, we observe similar failures occurring at varying points across different experimental runs.*
+*Training dynamics comparison: Total Variation + Distance (green) maintains stable learning throughout training, while KL Divergence + Distance (red) suffers collapse. Though this example shows collapse around step 1200, we observed similar patterns across multiple runs, though timing varied.*
 
-The training curves reveal that KL divergence with distance-based similarity initially learns effectively, often tracking the performance of Total Variation (the best method when utilizing a distance-based similarity kernel) and reaching validation accuracies near 80%. However, the optimization becomes unstable at unpredictable points during training, leading to catastrophic crashes that drive performance down to 10-20% accuracy. The example shown demonstrates a collapse around step 1200, but we observe similar failures occurring anywhere from step 800 to step 1600 across different runs.
+The training curves reveal that KL divergence with distance-based similarity initially learns effectively, often tracking the performance of Total Variation (the best method when utilizing a distance-based similarity kernel) and reaching validation accuracies near 80%. However, the optimization becomes unstable at unpredictable points during training, leading to crashes that drive performance down to 10-20% accuracy. 
 
 This instability may be intrinsic to the divergence-similarity combination. Across multiple independent runs, we observe collapses for KL divergence with distance-based similarity, though the exact timing varies. In contrast, Total Variation with distance-based similarity maintains stable training throughout, smoothly converging to high performance without any observed instability across all experimental runs.
 
