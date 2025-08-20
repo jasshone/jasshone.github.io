@@ -4,7 +4,7 @@
 *MIT Computer Science*
 
 ## TLDR
-A previous paper, I-Con, created a framework which describes representation learning methods. In short, this framework states that most representation learning methods can be explained as aligning a data distribution with a learned distribution, and the exact formulations for each distribution lead to a specific loss. However, (1) the distance metric between the distributions always uses KL, which is known to have specific issues, (2) many unexplored loss functions can be created by varying both the divergence measure and the similarity kernel (most losses use cosine similarity, but alternatives like euclidean distance are less explored). In this work, we show that trying different losses based on changing the distance metric and distance/similarity leads to state-of-the-art results.
+A previous paper, I-Con, created a framework which describes representation learning methods. In short, this framework states that most representation learning methods can be explained as aligning a data distribution with a learned distribution, and the exact formulations for each distribution lead to a specific loss. However, (1) the distance metric between the distributions always uses KL, which is known to have specific issues, (2) many unexplored loss functions can be created by varying both the divergence measure and the similarity kernel (most losses use cosine similarity, but alternatives like euclidean distance are less explored). In this work, we show that trying different losses based on changing the distance metric and distance/similarity leads to state-of-the-art results. Additionally, we discover that KL divergence, while effective with angular similarity measures, may exhibit training instability when paired with distance-based similarity kernels.
 
 ## Introduction
 
@@ -78,7 +78,7 @@ Notably, while KL divergence performs well with angular similarity measures, Tot
 
 ### Training Instability in Certain Divergence/Similarity Combinations
 
-Through monitoring training dynamics, we discovered that certain divergence-similarity combinations suffer from optimization instability. Most strikingly, KL divergence paired with distance-based similarity measures exhibits training collapse despite initially promising performance.
+Through monitoring training dynamics, we discovered that certain divergence-similarity combinations suffer from optimization instability. Most strikingly, while vanilla supcon (KL + cosine similarity kernel) trains in a stable manner, KL divergence paired with distance-based similarity measures exhibits training collapse despite initially promising performance.
 
 ![training instability](images/instability.png)
 
