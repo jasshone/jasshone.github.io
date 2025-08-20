@@ -3,6 +3,11 @@
 *Jasmine Shone; project in collaboration with Shaden Alshammari, Mark Hamilton, Bill Freeman*  
 *MIT Computer Science*
 
+## TLDR
+A previous paper, I-Con, created a framework which describes representation learning methods. In short, this framework states that most representation learning methods can be explained as aligning a data distribution with a learned distribution, and the exact formulations for each distribution lead to a specific loss. However, (1) the distance metric between the distributions always uses KL, which is known to have specific issues, (2) many unexplored loss functions can be created by varying both the divergence measure and the similarity kernel (most losses use cosine similarity, but alternatives like euclidean distance are less explored). In this work, we show that trying different losses based on changing the distance metric and distance/similarity leads to state-of-the-art results.
+
+## Introduction
+
 Representation learning has seen rapid progress through contrastive, clustering, and generative objectives, yet most methods implicitly optimize a single dissimilarity measure—typically the Kullback–Leibler (KL) divergence. While the recent *Information Contrastive* (I-Con) framework elegantly unified over 23 representation losses under integrated KL minimization, KL is *metric-agnostic* and can distort latent geometry. We present **Beyond I-Con**, a divergence-agnostic generalization that faithfully marries information geometry with data geometry.
 
 ## The Problem with KL-Centric Approaches
@@ -87,7 +92,7 @@ This instability may be intrinsic to the divergence-similarity combination. Acro
 
 ### Training Stability as a Critical Design Consideration
 
-Our analysis reveals that training stability varies across divergence-similarity combinations, with some exhibiting unpredictable failure modes. Specifically, the pairing of KL with distance-based similarity in supervised contrastive learning appears to lead to training instability-- which could be possible explanation for why there are more existing methods using a cosine-similarity kernel as shown in the I-Con table as KL is the base distance kernel used in loss formulations.
+Our analysis reveals that training stability varies across divergence-similarity combinations, with some exhibiting unpredictable failure modes. Specifically, the pairing of KL with distance-based similarity in supervised contrastive learning appears to lead to training instability-- which could be a possible explanation for why there are more existing methods using a cosine-similarity kernel as shown in the I-Con table as KL is the base distance kernel used in loss formulations.
 
 ### Empirical Patterns in Divergence-Similarity Combinations
 
@@ -103,11 +108,13 @@ The discovery of training instability in certain divergence combinations has imm
 
 ## Limitations and Future Directions
 
-While our framework successfully unifies diverse representation learning objectives, several limitations warrant discussion. Our empirical evaluation focuses primarily on computer vision tasks—the generalizability to natural language processing or graph representation learning remains an open question.
+While our framework successfully unifies diverse representation learning objectives, several limitations warrant discussion. 
 
-The computational overhead of certain divergences may limit their practical applicability in large-scale settings. Future work should investigate more efficient approximation schemes for geometry-aware divergences such as Wasserstein distances, or develop novel divergences that balance geometric awareness with computational tractability.
+Firstly, we did not thoroughly test the Wasserstein distance primarily because of computational overhead. Future work may continue along this direction because of theoretical reasons for why Wasserstein is superior to KL, such as was analyzed by the WGAN paper.
 
 The theoretical understanding of why certain divergences exhibit training instability in specific formulations remains incomplete. A deeper analysis of the optimization landscape, gradient dynamics, and convergence properties under different divergence choices would strengthen the framework and potentially suggest modifications to improve stability.
+
+Finally, while we created one new loss for Supervised Contrastive Learning in particular by swapping out the cosine similarity kernel for the euclidean kernel, this can be done for any loss which exists which is missing one of the two kernels, such as SimCLR. 
 
 ## Conclusion
 
