@@ -33,7 +33,7 @@ Months after I started the project, I got a Slack message from my collaborator w
 
 The authors cleverly use a VQA dataset (bridges text and images), frames the problem differently ("focuses" embedding according to text prompt), and also uses a different architecture (adds a text token to the input of the transformer).
 
-However, based on the OpenReview, seems like they didn't have a good time with finding baselines which can show their method is good which are widely accepted since most baselines are class-based to some extent such as clustering.
+However, based on the OpenReview, seems like they didn't have a good time with finding baselines which can show their method is good which are widely accepted, since most baselines are class-based to some extent such as clustering.
 
 ## Ponderings
 I think this project caused me to start thinking more about compression as a viable and interesting research problem. There's actually a high amount of literature on information loss depending on the task (e.g. classification) and multimodality (cross-modality information loss/interference in CLIP for example). Because in compression you choose what to "pay attention to" as a way to have intelligence when solving problems, you naturally may become worse at solving certain kinds of problems which are not represented in the training data/learning objective. Since compression is important for learning, though, the question becomes how to preserve the information we need through the specific task objective.
