@@ -112,7 +112,7 @@ Firstly, we did not thoroughly test the Wasserstein distance primarily because o
 
 The theoretical understanding of why certain divergences exhibit training instability in specific formulations remains incomplete. A deeper analysis of the optimization landscape, gradient dynamics, and convergence properties under different divergence choices would strengthen the framework and potentially suggest modifications to improve stability.
 
-Finally, while we created one new loss for Supervised Contrastive Learning in particular by swapping out the cosine similarity kernel for the euclidean kernel, this can be done for any loss which exists which is missing one of the two kernels, such as SimCLR. 
+Finally, while we created one new loss for Supervised Contrastive Learning in particular by swapping out the cosine similarity kernel for the euclidean kernel, this can be done for any loss which exists for which its counterpart using the other similarity kernel doesn't exist, such as SimCLR. 
 
 ## Conclusion
 
