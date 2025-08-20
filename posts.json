@@ -58,6 +58,12 @@
         "date": "2025-08-19",
         "excerpt": "We achieve state-of-the-art results on clustering and supervised learning by extending the I-Con framework to discover new losses.",
         "link": "posts/2025-08-19-Beyond-I-Con.md"
+    },
+    {
+        "title": "Better Notions of Similarity for Image-image Contrastive Learning",
+        "date": "2025-08-20",
+        "excerpt": "We attempt to find better notions of similarity but get scooped.",
+        "link": "posts/2025-08-20-Better-Notions-Of-Similarity.md"
     }
 
 ]
