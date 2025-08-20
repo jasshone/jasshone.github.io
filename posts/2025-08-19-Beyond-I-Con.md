@@ -67,24 +67,39 @@ Our experiments on CIFAR-10 explored both angular-based and distance-based formu
 | Hellinger | 89.16 / 87.12 | 92.50 / 91.93 |
 | Jensen-Shannon | 86.69 / 84.03 | 91.83 / 90.99 |
 
-*Results shown as Linear Probing / KNN accuracy percentages*
+*Results shown as Linear Probing / KNN accuracy percentages. All models are trained for 150 epochs with a ResNet-50 architecture.*
 
-Notably, while KL divergence performs well with angular similarity measures, Total Variation achieves the highest performance when combined with distance-based measures. This suggests that certain divergence-similarity measure combinations may be particularly effective for supervised contrastive learning.
+Notably, while KL divergence performs well with angular similarity measures, Total Variation achieves the highest performance when combined with distance-based measures. However, these final performance numbers only tell part of the story—a deeper analysis reveals differences in training dynamics across divergence-similarity combinations.
+
+### Training Instability in Certain Divergence/Similarity Combinations
+
+Through monitoring training dynamics, we discovered that certain divergence-similarity combinations suffer from optimization instability. Most strikingly, KL divergence paired with distance-based similarity measures exhibits training collapse despite initially promising performance.
+
+![training instability](images/instability.png)
+
+*Training dynamics comparison: Total Variation + Distance (green) maintains stable learning throughout training, while KL Divergence + Distance (red) suffers collapse. Though this example shows collapse around step 1200, we observe similar failures occurring at varying points across different experimental runs.*
+
+The training curves reveal that KL divergence with distance-based similarity initially learns effectively, often tracking the performance of Total Variation (the best method when utilizing a distance-based similarity kernel) and reaching validation accuracies near 80%. However, the optimization becomes unstable at unpredictable points during training, leading to catastrophic crashes that drive performance down to 10-20% accuracy. The example shown demonstrates a collapse around step 1200, but we observe similar failures occurring anywhere from step 800 to step 1600 across different runs.
+
+This instability may be intrinsic to the divergence-similarity combination. Across multiple independent runs, we observe collapses for KL divergence with distance-based similarity, though the exact timing varies. In contrast, Total Variation with distance-based similarity maintains stable training throughout, smoothly converging to high performance without any observed instability across all experimental runs.
 
 ## Key Insights and Implications
 
+### Training Stability as a Critical Design Consideration
+
+Our analysis reveals that training stability varies across divergence-similarity combinations, with some exhibiting unpredictable failure modes. Specifically, the pairing of KL with distance-based similarity in supervised contrastive learning appears to lead to training instability-- which could be possible explanation for why there are more existing methods using a cosine-similarity kernel as shown in the I-Con table as KL is the base distance kernel used in loss formulations.
+
 ### Empirical Patterns in Divergence-Similarity Combinations
 
-Our results reveal that different divergence measures exhibit varying effectiveness depending on the chosen similarity measure. The performance differences across these combinations suggest that the choice of divergence cannot be made independently of the similarity measure used in the loss function.
+Our results reveal that different divergence measures exhibit varying effectiveness depending on the chosen similarity measure. The performance differences across these combinations, coupled with their distinct training dynamics, suggest that the choice of divergence cannot be made independently of the similarity measure used in the loss function.
 
 ### Total Variation's Strong Performance with Distance-based Measures
 
-We observe that Total Variation distance performs particularly well when combined with distance-based similarity measures across multiple tasks. This may be related to its $L_1$-norm properties, which provide a more balanced treatment of probability differences compared to KL divergence, which can be dominated by probability mass on rare events.
+We observe that Total Variation distance performs particularly well when combined with distance-based similarity measures across multiple tasks. Beyond its strong final performance, Total Variation demonstrates superior optimization stability compared to KL divergence. This may be related to its $L_1$-norm properties, which provide a more balanced treatment of probability differences and more well-behaved gradients during training.
 
 ### Practical Implications
 
-Some of the newly explored divergence-similarity combinations demonstrate competitive performance with existing methods. This empirical finding suggests that practitioners may benefit from considering these alternative formulations, particularly when working with specific types of data or computational constraints.
-
+The discovery of training instability in certain divergence combinations has immediate practical implications. Methods that appear competitive in preliminary experiments may fail during extended training or deployment. Our systematic exploration provides practitioners with guidance on which combinations to avoid and which to prioritize for stable, reliable performance.
 
 ## Limitations and Future Directions
 
@@ -92,14 +107,14 @@ While our framework successfully unifies diverse representation learning objecti
 
 The computational overhead of certain divergences may limit their practical applicability in large-scale settings. Future work should investigate more efficient approximation schemes for geometry-aware divergences such as Wasserstein distances, or develop novel divergences that balance geometric awareness with computational tractability.
 
-The theoretical understanding of why certain divergences perform better in specific formulations remains incomplete. A deeper analysis of the optimization landscape and convergence properties under different divergence choices would strengthen the framework.
+The theoretical understanding of why certain divergences exhibit training instability in specific formulations remains incomplete. A deeper analysis of the optimization landscape, gradient dynamics, and convergence properties under different divergence choices would strengthen the framework and potentially suggest modifications to improve stability.
 
 ## Conclusion
 
-The Beyond I-Con framework challenges the field's implicit assumption that KL divergence is the natural choice for representation learning. By demonstrating that geometry-aware divergences can significantly outperform KL-based methods, we open new avenues for developing more principled approaches that explicitly account for the underlying data manifold structure.
+The Beyond I-Con framework challenges the field's implicit assumption that KL divergence is the natural choice for representation learning. By demonstrating that geometry-aware divergences can significantly outperform KL-based methods—and revealing optimization challenges with certain combinations—we open new avenues for developing more principled approaches that explicitly account for both the underlying data manifold structure and training dynamics.
 
-Our systematic exploration of divergence-similarity measure combinations provides a useful framework for analyzing existing methods and discovering new ones. This approach helps researchers understand how these design choices interact and may guide the selection of appropriate combinations for specific applications.
+Our systematic exploration of divergence-similarity measure combinations provides a useful framework for analyzing existing methods and discovering new ones. This approach helps researchers understand how these design choices interact and may guide the selection of appropriate combinations for specific applications, with particular attention to optimization stability.
 
-The future of representation learning lies not in finding the single "best" divergence, but in developing principled frameworks for selecting divergences that align with the geometric properties of the data and the specific requirements of the downstream task. The Beyond I-Con framework provides the theoretical foundation for this endeavor, while our empirical results demonstrate its practical promise.
+The future of representation learning lies not in finding the single "best" divergence, but in developing principled frameworks for selecting divergences that align with the geometric properties of the data, the specific requirements of the downstream task, and the practical constraints of reliable optimization. The Beyond I-Con framework provides the theoretical foundation for this endeavor, while our empirical results—including the discovery of training instability patterns—demonstrate its practical importance.
 
-As the field continues to grapple with more complex data modalities and geometric structures, we anticipate that divergence-aware approaches will become increasingly important. Our framework provides both the theoretical tools and empirical evidence needed to guide this evolution toward more geometry-aware representation learning methods.
+As the field continues to grapple with more complex data modalities and geometric structures, we anticipate that divergence-aware approaches will become increasingly important. Our framework provides both the theoretical tools and empirical evidence needed to guide this evolution toward more geometry-aware and optimization-robust representation learning methods.
