@@ -102,9 +102,7 @@ Our results reveal that different divergence measures exhibit varying effectiven
 
 We observe that Total Variation distance performs particularly well when combined with distance-based similarity measures across multiple tasks. Beyond its strong final performance, Total Variation demonstrates superior optimization stability compared to KL divergence. This may be related to its $L_1$-norm properties, which provide a more balanced treatment of probability differences and more well-behaved gradients during training.
 
-### Practical Implications
 
-The discovery of training instability in certain divergence combinations has immediate practical implications. Methods that appear competitive in preliminary experiments may fail during extended training or deployment. Our systematic exploration provides practitioners with guidance on which combinations to avoid and which to prioritize for stable, reliable performance.
 
 ## Limitations and Future Directions
 
