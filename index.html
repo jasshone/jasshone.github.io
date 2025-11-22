@@ -182,7 +182,7 @@
             width: 280px;
             height: 280px;
             border-radius: 20px;
-            object-fit: cover;
+            object-fit: contain;
             box-shadow: var(--shadow-xl);
             transition: all 0.3s ease;
         }
@@ -447,6 +447,10 @@
             transition: all 0.3s ease;
             opacity: 0;
             transform: translateY(30px);
+            display: flex;
+            flex-direction: row;
+            gap: 3rem;
+            align-items: flex-start;
         }
         
         .research-item.animate {
@@ -471,13 +475,13 @@
             color: var(--accent);
             font-weight: 600;
             font-size: 0.9rem;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
         
         .research-links {
             display: flex;
-            gap: 1rem;
-            margin: 1rem 0;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
             flex-wrap: wrap;
         }
         
@@ -486,7 +490,7 @@
             text-decoration: none;
             font-weight: 500;
             font-size: 0.9rem;
-            padding: 0.25rem 0.5rem;
+            padding: 0.25rem 0.25rem;
             border-radius: 6px;
             transition: all 0.3s ease;
         }
@@ -512,6 +516,78 @@
             display: block;
             margin-bottom: 0.5rem;
         }
+
+        /* Video/Image container for research items */
+        .research-video, .research-image {
+            flex: 0 0 200px;
+            width: 200px;
+            height: 200px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            flex-shrink: 0;
+        }
+
+        .research-video video, .research-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+    }
+
+        /* Remove old first-child specific styles since all items now use this layout */
+        .research-content-wrapper {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        /* Collapsible contributions */
+        .contributions-toggle {
+            cursor: pointer;
+            user-select: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--dark);
+            font-weight: 600;
+            margin-top: 1rem;
+            padding: 0.5rem 0;
+            transition: color 0.3s ease;
+        }
+
+        .contributions-toggle:hover {
+            color: var(--accent);
+        }
+
+        .contributions-toggle::before {
+            content: '▶';
+            display: inline-block;
+            transition: transform 0.3s ease;
+            font-size: 0.8em;
+        }
+
+        .contributions-toggle.active::before {
+            transform: rotate(90deg);
+        }
+
+        .contributions-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .contributions-content.active {
+            max-height: 500px;
+        }
+
+        .contributions-text {
+            padding-top: 0.5rem;
+            color: var(--text-gray);
+            line-height: 1.6;
+        }
+
         #linkedin {
             color: var(--primary);
             text-decoration: underline;
@@ -595,6 +671,17 @@
                 width: 240px;
                 height: 240px;
             }
+
+            .research-item {
+                flex-direction: column;
+            }
+
+            .research-video, .research-image {
+                flex: 1 1 auto;
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1/1;
+            }
         }
         
         /* Intersection Observer Classes */
@@ -637,7 +724,7 @@
                 <li><a href="#research">Research</a></li>
                 <li><a href="blog.html">Blog</a></li>
                 <a href="https://docs.google.com/document/d/1IotUcyU1DDuTVccRchE9AyiylOuC9F7ZL-lh7w6dJnM/edit?usp=sharing">CV</a>
-                <li><a href="mailto:jasshone@mit.edu">Contact</a></li>
+                <li><a href="/cdn-cgi/l/email-protection#ea808b99998285848faa87839ec48f8e9f">Contact</a></li>
             </ul>
         </div>
     </nav>
@@ -657,7 +744,7 @@
                         <a href="#research">Research</a>
                         <a href="#fun">Fun</a>
                         <a href="blog.html">Blog</a>
-                        <a href="mailto:jasshone@mit.edu">Email</a>
+                        <a href="/cdn-cgi/l/email-protection#6c060d1f1f040302092c01051842090819">Email</a>
                         <a href="https://github.com/jasshone/">Github</a>
                     </div>
                 </div>
@@ -793,152 +880,250 @@
                 <h2>Research</h2>
                 <p>I'm currently interested in world-modelling and 3D generation. Relatedly, I'm interested in retrieval, memory, and context— making models that remember and see beyond immediate inputs/tasks. I'm also interested in intelligence which comes from compression, with feature/representation learning being a subset of that interest. Within representation learning, I've been curious recently about vision model representations and cross-modality information loss. </p>
             </div>
-                <div class="research-grid">
-                  <div class="research-item fade-in-section">
-                    <h3>SAM 3D @ Meta Superintelligence</h3>
-                    <div class="research-venue">In Submission</div>
-                    <div class="research-links">
-                        <a href="https://ai.meta.com/sam3d/">launch</a>
-                        <a href="https://ai.meta.com/research/publications/sam-3d-3dfy-anything-in-images/">paper</a>
+            <div class="research-grid">
+                <div class="research-item fade-in-section">
+                    <div class="research-video">
+                        <image src="images/pretty.gif"/>
+                        
                     </div>
-                    <p>2D to 3D objects!</p>
-                    <div class="research-contributions">
-                        <strong>Contributions:</strong>
-                        Designing and implementing a modified version of the SuGaR algorithm, reducing runtime from 30 m to ~1 m 40 s. 
-                        Proposing and implementing pointcloud downsampling algorithm which reduces points by up to an 12% average.
-                        Created parallelized script to improve training efficiency through data cleaning, detecting 6+% of corrupted data.
-                        Implemented baseline for evaluation metric and created easy-to-follow jupyter notebook.
-
-                    </div>
-                </div>
-                <div class="research-grid">
-                  <div class="research-item fade-in-section">
-                    <h3>Beyond I-Con: Exploring a New Dimension of Distance Measures in Representation Learning</h3>
-                    <div class="research-venue">NeurIPS NeurReps Workshop 2025, NeurIPS WiML Workshop 2025, In Submission</div>
-                    <div class="research-links">
-                        <a href="markdown-viewer.html?file=posts%2F2025-08-19-Beyond-I-Con.md&title=Beyond%20I-Con%3A%20Exploring%20a%20New%20Dimension%20of%20Distance%20Measures%20in%20Representation%20Learning">blog</a>
-                        <a href="https://www.arxiv.org/abs/2509.04734">arXiv</a>
-                    </div>
-                    <p>We extend the I-Con framework to discover new losses which achieve state-of-the-art results on clustering and supervised contrastive learning.</p>
-                    <div class="research-contributions">
-                        <strong>Contributions:</strong>
-                        Designed, implemented, and evaluated loss functions based on the I-Con framework. Conducted analysis on experimental results.
+                    <div class="research-content-wrapper">
+                        <h3>Latent Diffusion for PDEs</h3>
+                        <div class="research-venue">In Progress</div>
+                        <p>Modeling cool physics</p>
+                        <div class="contributions-toggle">
+                            Contributions
+                        </div>
+                        <div class="contributions-content">
+                            <div class="contributions-text">
+                                Building out pipeline, running experiments
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="research-item fade-in-section">
-                  <h3>Text-Invariant Similarity Learning</h3>
-                  <div class="research-links">
-                      <a href="markdown-viewer.html?file=posts%2F2025-08-20-Better-Notions-Of-Similarity.md&title=Better%20Notions%20of%20Similarity%20for%20Image-image%20Contrastive%20Learning">blog</a>
-                  </div>
-                  <p>We create a new paradigm of image-pair similarity learning conditioned on text descriptions.</p>
-                  <div class="research-contributions">
-                      <strong>Contributions:</strong>
-                      Designed and implemented image-pair similarity annotation pipeline.
-                      Designed, implemented, and explored different experimental setups and loss functions.
-                  </div>
-              </div>
-                <div class="research-item fade-in-section">
-                    <h3>Keypoint Abstraction using Large Models for Object-Relative Imitation Learning</h3>
-                    <div class="research-venue">ICRA 2025, CoRL LangRob Workshop Best Paper 2024</div>
-                    <div class="research-links">
-                        <a href="https://kalm-il.github.io/">project page</a>
-                        <a href="https://arxiv.org/abs/2410.23254">arXiv</a>
+                    <div class="research-video">
+                        <video controls autoplay loop muted playsinline>
+                            <source src="images/SAM3D1.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
                     </div>
-                    <p>By utilizing priors from Vision-language models and image features from large classification models to create a novel keypoint abstraction for robot actions, we generalize effectively across object poses, camera viewpoints, and object instances with only 10 demonstrations.</p>
-                    <div class="research-contributions">
-                        <strong>Contributions:</strong>
-                        Trained multimodal models utilizing pointcloud encoders, object-wise transformers, and vision foundation models, improving evaluation performance by 27.5%<br>
-                        Created and designed keypoint proposal pipeline with specialized VLM prompting SAM, furthest point sampling, mark-based prompting, RANSAC, and point cloud clustering
+                    <div class="research-content-wrapper">
+                        <h3>SAM 3D @ Meta Superintelligence</h3>
+                        <div class="research-venue">In Submission</div>
+                        <div class="research-links">
+                            <a href="https://ai.meta.com/sam3d/">launch</a>
+                            <a href="https://ai.meta.com/research/publications/sam-3d-3dfy-anything-in-images/">paper</a>
+                        </div>
+                        <p>2D to 3D objects!</p>
+                        <div class="contributions-toggle">
+                            Contributions
+                        </div>
+                        <div class="contributions-content">
+                            <div class="contributions-text">
+                                Designing and implementing a modified version of the SuGaR algorithm, reducing runtime from 30 m to ~1 m 40 s. 
+                                Proposing and implementing pointcloud downsampling algorithm which reduces points by up to an 12% average.
+                                Created parallelized script to improve training efficiency through data cleaning, detecting 6+% of corrupted data.
+                                Implemented baseline for evaluation metric and created easy-to-follow jupyter notebook.
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="research-item fade-in-section">
-                    <h3>The Correlation of Regional Gas Prices with Unemployment</h3>
-                    <div class="research-venue">Citadel Women's Datathon Winning Report 2024</div>
-                    <p>Are fluctuations in gas prices predictive of unemployment rates and how do regional differences in mass transit and gasoline production affect this trend?</p>
-                    <div class="research-contributions">
-                        <strong>Contributions:</strong>
-                        Coming up with the initial research question + insight to use multiple additional datasets beyond the ones we were provided in the competition. Also worked on most of the stats/modelling work (Granger Causality, ADF, VAR modelling).
+                    <div class="research-image">
+                        <img src="images/Beyond_ICON.png" alt="Beyond I-Con">
+                    </div>
+                    <div class="research-content-wrapper">
+                        <h3>Beyond I-Con: Exploring a New Dimension of Distance Measures in Representation Learning</h3>
+                        <div class="research-venue">NeurIPS NeurReps Workshop 2025, NeurIPS WiML Workshop 2025, In Submission</div>
+                        <div class="research-links">
+                            <a href="markdown-viewer.html?file=posts%2F2025-08-19-Beyond-I-Con.md&title=Beyond%20I-Con%3A%20Exploring%20a%20New%20Dimension%20of%20Distance%20Measures%20in%20Representation%20Learning">blog</a>
+                            <a href="https://www.arxiv.org/abs/2509.04734">arXiv</a>
+                        </div>
+                        <p>We extend the I-Con framework to discover new losses which achieve state-of-the-art results on clustering and supervised contrastive learning.</p>
+                        <div class="contributions-toggle">
+                            Contributions
+                        </div>
+                        <div class="contributions-content">
+                            <div class="contributions-text">
+                                Designed, implemented, and evaluated loss functions based on the I-Con framework. Conducted analysis on experimental results.
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="research-item fade-in-section">
-                    <h3>SketchAgent: Language-Driven Sequential Sketch Generation</h3>
-                    <div class="research-venue">CVPR 2025</div>
-                    <div class="research-links">
-                        <a href="https://yael-vinker.github.io/sketch-agent/">project page</a>
+                    <div class="research-image">
+                        <img src="images/embeddings.png" alt="Text-Invariant Similarity Learning">
                     </div>
-                    <p>We introduce SketchAgent, a novel framework for generating sequential sketches from language prompts. By leveraging large language models and diffusion models, we achieve high-quality sketch generation that captures the essence of the input text.</p>
-                    <div class="research-contributions">
-                        <strong>Contributions:</strong>
-                        Worked on moving the LLM inference pipeline to a locally hosted version of Llama Vision 3.2 11B and Llama 3.2 90B. Learned about quantization, multi-gpu inference, and prompting techniques.
-                    </div>
-                </div>
-                
-                <div class="research-item fade-in-section">
-                    <h3>Systematic Optimization of App Generation Few Shot Learning for Large Language Models Trained on Code</h3>
-                    <div class="research-venue">Research Science Institute, Regeneron Talent Search Top 300, Acta Scientific 2023</div>
-                    <div class="research-links">
-                        <a href="https://actascientific.com/ASCS/pdf/ASCS-05-0448.pdf">Paper</a>
-                        <a href="https://llmpaper.tiiny.site">Regeneron Talent Search version</a>
-                    </div>
-                    <p>We create an LLM in-context learning pipeline to systematically optimize (1) maximum token length of the prompt, (2) the mechanism of choosing few-shot examples, and (3) the ordering of few-shot examples to generate applications.</p>
-                    <div class="research-contributions">
-                        <strong>Contributions:</strong>
-                        Developed the p-mRMR algorithm and prompt creation framework, designed and wrote an evaluation suite of test applications and performed manual error evaluation of generated apps.
+                    <div class="research-content-wrapper">
+                        <h3>Text-Invariant Similarity Learning</h3>
+                        <div class="research-links">
+                            <a href="markdown-viewer.html?file=posts%2F2025-08-20-Better-Notions-Of-Similarity.md&title=Better%20Notions%20of%20Similarity%20for%20Image-image%20Contrastive%20Learning">blog</a>
+                        </div>
+                        <p>We create a new paradigm of image-pair similarity learning conditioned on text descriptions.</p>
+                        <div class="contributions-toggle">
+                            Contributions
+                        </div>
+                        <div class="contributions-content">
+                            <div class="contributions-text">
+                                Designed and implemented image-pair similarity annotation pipeline.
+                                Designed, implemented, and explored different experimental setups and loss functions.
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="research-item fade-in-section">
-                    <h3>Validating the Usage of Stable Diffusion Foundational Models on Generating Glaucoma Fundus Images in Low-Data Settings</h3>
-                    <div class="research-venue">Computer Vision Final Project</div>
-                    <p>We improve stable diffusion's ability to generate high-quality fundus images of the eye, specifically for glaucoma, by finetuning on an extremely small dataset of 170 images.</p>
-                    <div class="research-contributions">
-                        <strong>Contributions:</strong>
-                        Worked on designing the project/experiments, training the model, doing evals with resnet, and baselines (GANs)
+                    <div class="research-video">
+                        <video controls autoplay loop muted playsinline>
+                            <source src="images/pour_obj.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="research-content-wrapper">
+                        <h3>Keypoint Abstraction using Large Models for Object-Relative Imitation Learning</h3>
+                        <div class="research-venue">ICRA 2025, CoRL LangRob Workshop Best Paper 2024</div>
+                        <div class="research-links">
+                            <a href="https://kalm-il.github.io/">project page</a>
+                            <a href="https://arxiv.org/abs/2410.23254">arXiv</a>
+                        </div>
+                        <p>Utilizing priors from Vision-language models and image features to generalize effectively across object poses, camera viewpoints, and object instances with only 10 demonstrations.</p>
+                        <div class="contributions-toggle">
+                            Contributions
+                        </div>
+                        <div class="contributions-content">
+                            <div class="contributions-text">
+                                Trained multimodal models utilizing pointcloud encoders, object-wise transformers, and vision foundation models, improving evaluation performance by 27.5%<br>
+                                Created and designed keypoint proposal pipeline with specialized VLM prompting SAM, furthest point sampling, mark-based prompting, RANSAC, and point cloud clustering
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="research-item fade-in-section">
+                    <div class="research-image">
+                        <img src="images/Datathon.png" alt="Gas Prices Research">
+                    </div>
+                    <div class="research-content-wrapper">
+                        <h3>The Correlation of Regional Gas Prices with Unemployment</h3>
+                        <div class="research-venue">Citadel Women's Datathon Winning Report 2024</div>
+                        <p>Are fluctuations in gas prices predictive of unemployment rates and how do regional differences in mass transit and gasoline production affect this trend?</p>
+                        <div class="contributions-toggle">
+                            Contributions
+                        </div>
+                        <div class="contributions-content">
+                            <div class="contributions-text">
+                                Coming up with the initial research question + insight to use multiple additional datasets beyond the ones we were provided in the competition. Also worked on most of the stats/modelling work (Granger Causality, ADF, VAR modelling).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="research-item fade-in-section">
+                    <div class="research-video">
+                        <video controls autoplay loop muted playsinline>
+                            <source src="images/sketch.mp4" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <div class="research-content-wrapper">
+                        <h3>SketchAgent: Language-Driven Sequential Sketch Generation</h3>
+                        <div class="research-venue">CVPR 2025</div>
+                        <div class="research-links">
+                            <a href="https://yael-vinker.github.io/sketch-agent/">project page</a>
+                        </div>
+                        <p>We introduce SketchAgent, a novel framework for generating sequential sketches from language prompts. By leveraging large language models and diffusion models, we achieve high-quality sketch generation that captures the essence of the input text.</p>
+                        <div class="contributions-toggle">
+                            Contributions
+                        </div>
+                        <div class="contributions-content">
+                            <div class="contributions-text">
+                                Worked on moving the LLM inference pipeline to a locally hosted version of Llama Vision 3.2 11B and Llama 3.2 90B. Learned about quantization, multi-gpu inference, and prompting techniques.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="research-item fade-in-section">
+                    <div class="research-image">
+                        <img src="images/app_creation.png" alt="LLM App Generation">
+                    </div>
+                    <div class="research-content-wrapper">
+                        <h3>Systematic Optimization of App Generation Few Shot Learning for Large Language Models Trained on Code</h3>
+                        <div class="research-venue">Research Science Institute, Regeneron Talent Search Top 300, Acta Scientific 2023</div>
+                        <div class="research-links">
+                            <a href="https://actascientific.com/ASCS/pdf/ASCS-05-0448.pdf">Paper</a>
+                            <a href="https://llmpaper.tiiny.site">Regeneron Talent Search version</a>
+                        </div>
+                        <p>We create an LLM in-context learning pipeline to systematically optimize (1) maximum token length of the prompt, (2) the mechanism of choosing few-shot examples, and (3) the ordering of few-shot examples to generate applications.</p>
+                        <div class="contributions-toggle">
+                            Contributions
+                        </div>
+                        <div class="contributions-content">
+                            <div class="contributions-text">
+                                Developed the p-mRMR algorithm and prompt creation framework, designed and wrote an evaluation suite of test applications and performed manual error evaluation of generated apps.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="research-item fade-in-section">
+                    <div class="research-image">
+                        <img src="images/fundus1.png" alt="Glaucoma Research">
+                    </div>
+                    <div class="research-content-wrapper">
+                        <h3>Validating the Usage of Stable Diffusion Foundational Models on Generating Glaucoma Fundus Images in Low-Data Settings</h3>
+                        <div class="research-venue">Computer Vision Final Project</div>
+                        <p>We improve stable diffusion's ability to generate high-quality fundus images of the eye, specifically for glaucoma, by finetuning on an extremely small dataset of 170 images.</p>
+                        <div class="contributions-toggle">
+                            Contributions
+                        </div>
+                        <div class="contributions-content">
+                            <div class="contributions-text">
+                                Worked on designing the project/experiments, training the model, doing evals with resnet, and baselines (GANs)
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+    
     <section id="fun">
-        
         <div class="container">
             <div class="section-header fade-in-section">
                 <h2>Fun Stuff</h2>
             </div>
             <div class="research-grid">
-              <div class="research-item fade-in-section">
-                <h3>Music</h3>
-                <div class="research-links">
-                    <a href="https://youtu.be/dYIOTRNfNPw?feature=shared">Until I Found You</a>
-                    <a href="https://youtu.be/28cnYUPvkE8?feature=shared">After the Journey</a>
-                    <a href="https://www.instagram.com/jasmine_s.wav/">Singing Account</a>
+                <div class="research-item fade-in-section">
+                    <h3>Music</h3>
+                    <div class="research-links">
+                        <a href="https://youtu.be/dYIOTRNfNPw?feature=shared">Until I Found You</a>
+                        <a href="https://youtu.be/28cnYUPvkE8?feature=shared">After the Journey</a>
+                        <a href="https://www.instagram.com/jasmine_s.wav/">Singing Account</a>
+                    </div>
                 </div>
-              </div>
-              <div class="research-item fade-in-section">
-                <h3>Writing</h3>
-                <div class="research-links">
-                    <a href="https://docs.google.com/document/d/1Dj1WdJ7DWwaYeUvAaqp-dzbUK3Oqmg006THt9MCAj_Q/edit?usp=sharing">Thoughts in the Silent Night</a>
-                    <a href="https://docs.google.com/document/d/19IPOXSQN7a7vaFwNrYfMTrv9oBMD5CFzXMKdGEC8aYI/edit?usp=sharing">Houston Rain</a>
-                    <a href="https://docs.google.com/document/d/16uQt5osBchymAD8EDuChpB3t1bHRnBTj3cJCqqnXU-A/edit?usp=sharing">Dreaming of Clocks and Rain</a>
+                <div class="research-item fade-in-section">
+                    <h3>Writing</h3>
+                    <div class="research-links">
+                        <a href="https://docs.google.com/document/d/1Dj1WdJ7DWwaYeUvAaqp-dzbUK3Oqmg006THt9MCAj_Q/edit?usp=sharing">Thoughts in the Silent Night</a>
+                        <a href="https://docs.google.com/document/d/19IPOXSQN7a7vaFwNrYfMTrv9oBMD5CFzXMKdGEC8aYI/edit?usp=sharing">Houston Rain</a>
+                        <a href="https://docs.google.com/document/d/16uQt5osBchymAD8EDuChpB3t1bHRnBTj3cJCqqnXU-A/edit?usp=sharing">Dreaming of Clocks and Rain</a>
+                    </div>
                 </div>
-              </div>
-              <div class="research-item fade-in-section">
-                <h3>Games</h3>
-                <div class="research-links">
-                    <a href="https://ssstudios.itch.io/the-collector">The Collector</a>
-                    <a href="https://willyue.itch.io/a-quarky-tale">A Quarky Tale</a>
+                <div class="research-item fade-in-section">
+                    <h3>Games</h3>
+                    <div class="research-links">
+                        <a href="https://ssstudios.itch.io/the-collector">The Collector</a>
+                        <a href="https://willyue.itch.io/a-quarky-tale">A Quarky Tale</a>
+                    </div>
                 </div>
-              </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    
-
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         // Intersection Observer for animations
         const observerOptions = {
             threshold: 0.1,
@@ -994,6 +1179,15 @@
                 nav.style.background = 'rgba(255, 255, 255, 0.9)';
                 nav.style.boxShadow = 'none';
             }
+        });
+
+        // Collapsible contributions toggle
+        document.querySelectorAll('.contributions-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function() {
+                this.classList.toggle('active');
+                const content = this.nextElementSibling;
+                content.classList.toggle('active');
+            });
         });
     </script>
 </body>
