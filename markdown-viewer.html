@@ -3,414 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdown Viewer - Jasmine Shone</title>
+    <title>Post | Jasmine Shone</title>
     <link rel="icon" type="image/svg+xml" href="images/cat.png" />
+    
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- KaTeX CSS and JS for LaTeX rendering -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Newsreader:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         :root {
-            --background: #ffffff;
-            --background-alt: #f9f9f9;
-            --text: #111111;
-            --text-muted: #666666;
-            --primary: #111111;
-            --accent: #2563eb;
-            --border: #e5e5e5;
-            --light-gray: #f5f5f5;
-            --medium-gray: #e5e5e5;
-            --text-gray: #666666;
-            --dark: #111111;
-            --white: #ffffff;
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --bg: #ffffff;
+            --text-main: #111111;
+            --text-muted: #555555;
+            --text-light: #777777;
+            --accent: #A31F34; 
+            --link: #111111;
+            --link-hover: #A31F34;
+            --code-bg: #f5f5f5;
+            
+            /* FIXED: Matches index.html and blog.html exactly */
+            --max-width: 960px; 
         }
 
+        /* Global Reset */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: var(--dark);
-            background-color: var(--white);
+            font-family: 'Newsreader', serif;
+            background: var(--bg);
+            color: var(--text-main);
+            line-height: 1.7; 
+            font-size: 19px; 
         }
+
+        h1, h2, h3, h4, .sans { font-family: 'Inter', sans-serif; }
+
+        a { text-decoration: none; color: var(--link); transition: color 0.2s; }
+        a:hover { color: var(--link-hover); }
         
+        /* Layout Container - Matches Blog Exactly */
         .container {
-            max-width: 900px;
+            max-width: var(--max-width);
             margin: 0 auto;
-            padding: 0 2rem;
+            padding: 4rem 20px;
         }
-        
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            z-index: 1000;
-        }
-        
-        nav .container {
+
+        /* --- Header / Nav (Identical to Blog) --- */
+        .nav-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 2rem;
+            margin-bottom: 60px;
+            font-family: 'Inter', sans-serif; /* Explicitly set font */
         }
-        
+
         .logo {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary);
-            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem; /* Matches Blog font size */
         }
-        
+
         .nav-links {
             display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-        
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-gray);
-            font-weight: 500;
+            gap: 20px;
             font-size: 0.9rem;
-            transition: all 0.3s ease;
-            position: relative;
         }
-        
-        .nav-links a:hover {
-            color: var(--primary);
-        }
-        
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -4px;
-            left: 0;
-            background-color: var(--primary);
-            transition: width 0.3s ease;
-        }
-        
-        .nav-links a:hover::after {
+
+        .nav-links a { color: var(--text-muted); }
+        .nav-links a:hover { color: var(--accent); }
+
+        /* --- Markdown Content --- */
+        /* We constrain the reading width here separately 
+           so the Header stays wide (aligned with blog) 
+           but the text isn't too wide to read.
+        */
+        .markdown-wrapper {
             width: 100%;
+            /* Optional: Center the content block */
+            /* max-width: 800px; margin: 0 auto; */ 
         }
-        
-        /* Content */
-        .content {
-            padding: 7rem 0 4rem;
+
+        #markdown-container {
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease;
         }
-        
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 500;
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
-        }
-        
-        .back-link:hover {
-            color: var(--primary);
-        }
-        
-        .back-link::before {
-            content: '←';
-            margin-right: 0.5rem;
-        }
-        
-        .markdown-content {
-            background: var(--white);
-            padding: 2.5rem;
-            border-radius: 16px;
-            box-shadow: var(--shadow-md);
-        }
-        
-        /* Markdown content styling */
-        .markdown-content h1,
-        .markdown-content h2,
-        .markdown-content h3 {
-            margin-top: 1.5em;
-            margin-bottom: 0.5em;
-            color: var(--dark);
-        }
-        
+
         .markdown-content h1 {
             font-size: 2.2rem;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 0.3em;
+            font-weight: 700;
+            margin-bottom: 0.5em;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
         }
         
         .markdown-content h2 {
-            font-size: 1.8rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 2em;
+            margin-bottom: 0.8em;
+            letter-spacing: -0.01em;
         }
-        
+
         .markdown-content h3 {
-            font-size: 1.4rem;
-        }
-        
-        .markdown-content p {
-            margin-bottom: 1em;
-            line-height: 1.7;
-        }
-        
-        .markdown-content ul, 
-        .markdown-content ol {
-            margin-bottom: 1em;
-            padding-left: 2em;
-        }
-        
-        .markdown-content li {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.5em;
             margin-bottom: 0.5em;
         }
-        
-        .markdown-content code {
-            background-color: var(--light-gray);
-            padding: 0.2em 0.4em;
-            border-radius: 3px;
-            font-family: 'SF Mono', Monaco, Inconsolata, 'Roboto Mono', Consolas, 'Courier New', monospace;
-            font-size: 0.9em;
+
+        .markdown-content p { margin-bottom: 1.5em; }
+        .markdown-content strong { font-weight: 600; color: #000; }
+        .markdown-content ul, .markdown-content ol { margin-bottom: 1.5em; padding-left: 20px; }
+        .markdown-content li { margin-bottom: 0.5em; }
+
+        .markdown-content blockquote {
+            border-left: 3px solid var(--accent);
+            padding-left: 20px;
+            margin: 2em 0;
+            font-style: italic;
+            color: var(--text-muted);
+            background: #fafafa;
+            padding: 15px 20px;
         }
-        
+
+        .markdown-content code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--code-bg);
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
         .markdown-content pre {
-            background-color: var(--light-gray);
-            padding: 1em;
-            border-radius: 5px;
+            background: var(--code-bg);
+            padding: 20px;
+            border-radius: 8px;
             overflow-x: auto;
             margin-bottom: 1.5em;
         }
         
-        .markdown-content pre code {
-            background: none;
-            padding: 0;
-        }
-        
-        .markdown-content blockquote {
-            border-left: 4px solid var(--accent);
-            padding-left: 1em;
-            margin-left: 0;
-            color: var(--text-gray);
-            font-style: italic;
-        }
-        
-        .markdown-content a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-        
-        .markdown-content a:hover {
-            text-decoration: underline;
-        }
-        
-        .markdown-content table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 1.5em;
-        }
-        
-        .markdown-content th, 
-        .markdown-content td {
-            padding: 0.75em;
-            border: 1px solid var(--border);
-        }
-        
-        .markdown-content th {
-            background-color: var(--light-gray);
-            font-weight: 600;
-        }
-        
+        .markdown-content pre code { background: none; padding: 0; font-size: 0.85em; }
+
         .markdown-content img {
             max-width: 100%;
             height: auto;
-            border-radius: 8px;
-            margin: 1.5em 0;
+            border-radius: 6px;
+            margin: 2em auto;
+            display: block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .markdown-content a {
+            color: var(--accent);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .markdown-content a:hover { color: #000; }
+
+        .loading { text-align: center; color: var(--text-muted); margin-top: 50px; }
+        .error { color: var(--accent); text-align: center; margin-top: 50px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .markdown-content hr {
-            border: none;
-            height: 1px;
-            background-color: var(--border);
-            margin: 2em 0;
-        }
-        
-        /* KaTeX math styling */
-        .katex-display {
-            margin: 1.5em 0;
-            text-align: center;
-        }
-        
-        .katex {
-            font-size: 1.1em;
-        }
-        
-        /* Loading and error states */
-        .loading {
-            text-align: center;
-            color: var(--text-gray);
-            font-style: italic;
-            padding: 3rem;
-        }
-        
-        .error {
-            background: #ffebee;
-            color: #c62828;
-            padding: 1.5rem;
-            border-radius: 12px;
-        }
-        
-        /* Footer */
-        footer {
-            background-color: var(--dark);
-            color: var(--light-gray);
-            padding: 2rem 0;
-            text-align: center;
-            margin-top: 3rem;
-        }
-        
-        footer p {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-        
-        /* Responsive */
         @media (max-width: 768px) {
-            .container {
-                padding: 0 1rem;
-            }
-            
-            nav .container {
-                padding: 1rem;
-            }
-            
-            .nav-links {
-                display: none;
-            }
-            
-            .content {
-                padding: 6rem 0 2rem;
-            }
-            
-            .markdown-content {
-                padding: 1.5rem;
-            }
-            
-            .markdown-content h1 {
-                font-size: 1.8rem;
-            }
-            
-            .markdown-content h2 {
-                font-size: 1.5rem;
-            }
-            
-            .markdown-content h3 {
-                font-size: 1.25rem;
-            }
+            body { font-size: 17px; }
+            .markdown-content h1 { font-size: 1.8rem; }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="container">
-            <a href="index.html" class="logo">Jasmine Shone</a>
-            <ul class="nav-links">
-                <li><a href="index.html#experience">Work Experience</a></li>
-                <li><a href="index.html#awards">Awards</a></li>
-                <li><a href="index.html#research">Research</a></li>
-                <li><a href="blog.html">Blog</a></li>
-                <li><a href="mailto:jasshone@mit.edu">Contact</a></li>
-            </ul>
-        </div>
-    </nav>
 
-    <!-- Content -->
-    <div class="content">
-        <div class="container">
-            <a href="blog.html" class="back-link">Back to Blog</a>
-            <div id="markdown-container">
-                <div class="loading">Loading content...</div>
+    <div class="container">
+        <header class="nav-header">
+            <div class="logo"><a href="index.html">Jasmine Shone</a></div>
+            <nav class="nav-links">
+                <a href="blog.html">&larr; Back to Blog</a>
+            </nav>
+        </header>
+
+        <div class="markdown-wrapper">
+            <div id="markdown-container" class="markdown-content">
+                <div class="loading">Loading article...</div>
             </div>
+        </div>
+
+        <div style="text-align:center; padding: 60px 0; color: #999; font-size: 0.8rem; font-family:'Inter',sans-serif;">
+            &copy; 2025 Jasmine Shone. 
         </div>
     </div>
 
     <script>
-        // Get the markdown file path from URL parameters
-        const urlParams = new URLSearchParams(window.location.search);
-        const filePath = urlParams.get('file');
-        const title = urlParams.get('title') || 'Blog Post';
-        
-        // Update page title
-        document.title = `${title} - Jasmine Shone`;
-        
         async function loadMarkdownFile() {
-            if (!filePath) {
-                document.getElementById('markdown-container').innerHTML = `
-                    <div class="error">
-                        <h3>Error Loading Content</h3>
-                        <p>No file specified.</p>
-                        <p>Please check your link and try again.</p>
-                    </div>
-                `;
+            const urlParams = new URLSearchParams(window.location.search);
+            const file = urlParams.get('file');
+            const title = urlParams.get('title');
+            
+            if (title) document.title = `${title} | Jasmine Shone`;
+
+            const container = document.getElementById('markdown-container');
+
+            if (!file) {
+                container.innerHTML = '<div class="error">No file specified.</div>';
                 return;
             }
-            
+
             try {
-                const response = await fetch(filePath);
-                if (!response.ok) {
-                    throw new Error(`Failed to load markdown: ${response.status} ${response.statusText}`);
-                }
+                const response = await fetch(file);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const text = await response.text();
                 
-                const markdown = await response.text();
-                const htmlContent = marked.parse(markdown);
-                
-                document.getElementById('markdown-container').innerHTML = `
-                    <article class="markdown-content">
-                        ${htmlContent}
-                    </article>
-                `;
-                
-                // Render LaTeX math expressions after loading content
+                container.innerHTML = marked.parse(text);
                 renderMath();
-                
+
             } catch (error) {
-                console.error('Error loading markdown:', error);
-                document.getElementById('markdown-container').innerHTML = `
-                    <div class="error">
-                        <h3>Error Loading Content</h3>
-                        <p>${error.message}</p>
-                        <p>Please check if the markdown file exists.</p>
-                    </div>
-                `;
+                console.error('Error:', error);
+                container.innerHTML = `<div class="error"><h3>Error Loading Post</h3><p>Could not load: ${file}</p></div>`;
             }
         }
         
         function renderMath() {
-            // Configure KaTeX to render math expressions
             renderMathInElement(document.getElementById('markdown-container'), {
-                // The list of delimiters to look for math expressions
                 delimiters: [
-                    {left: '$$', right: '$$', display: true},   // Block math
-                    {left: '$', right: '$', display: false},   // Inline math
-                    {left: '\\(', right: '\\)', display: false}, // Alternative inline
-                    {left: '\\[', right: '\\]', display: true}   // Alternative block
+                    {left: '$$', right: '$$', display: true},
+                    {left: '$', right: '$', display: false},
+                    {left: '\\(', right: '\\)', display: false}, 
+                    {left: '\\[', right: '\\]', display: true}   
                 ],
-                // KaTeX options
-                throwOnError: false,  // Don't break on LaTeX errors
+                throwOnError: false,
                 errorColor: '#cc0000',
                 strict: false,
                 trust: false,
                 macros: {
-                    // You can define custom LaTeX macros here if needed
                     "\\RR": "\\mathbb{R}",
                     "\\NN": "\\mathbb{N}",
                     "\\ZZ": "\\mathbb{Z}",
@@ -420,7 +252,6 @@
             });
         }
 
-        // Load markdown when page is ready
         document.addEventListener('DOMContentLoaded', loadMarkdownFile);
     </script>
 </body>

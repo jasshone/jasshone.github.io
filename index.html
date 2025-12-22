@@ -3,1190 +3,622 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jasmine Shone</title>
+    <title>Jasmine Shone | MIT</title>
     <link rel="icon" type="image/svg+xml" href="images/cat.png" />
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Newsreader:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         :root {
-            --background: #ffffff;
-            --background-alt: #f9f9f9;
-            --text: #111111;
-            --text-muted: #666666;
-            --primary: #111111;   /* almost black, clean */
-            --primary-light: #315195; /* slightly lighter for hover effects */
-            --accent: #2563eb;    /* subtle blue for hover/links */
-            --border: #e5e5e5;
+            --bg: #ffffff;
+            --text-main: #111111;
+            --text-muted: #555555;
+            --text-light: #777777;
+            --accent: #A31F34; /* MIT Red */
+            --link: #111111;
+            --link-hover: #A31F34;
+            --max-width: 960px; 
         }
 
-        
+        /* Global Reset */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Newsreader', serif;
+            background: var(--bg);
+            color: var(--text-main);
             line-height: 1.6;
-            color: var(--dark);
-            background-color: var(--white);
+            font-size: 18px;
+            overflow-y: scroll; /* Prevents layout shift between pages */
         }
+
+        h1, h2, h3, h4, .sans { font-family: 'Inter', sans-serif; }
+
+        a { text-decoration: none; color: var(--link); transition: color 0.2s; }
+        a:hover { color: var(--link-hover); }
         
+        /* Layout Container with Entrance Animation */
         .container {
-            max-width: 1200px;
+            max-width: var(--max-width);
             margin: 0 auto;
-            padding: 0 2rem;
+            padding: 4rem 20px;
+            /* The Animation: Fades in and slides up slightly */
+            animation: pageEnter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border);
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-        
-        nav .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2rem;
-        }
-        
-        .logo {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary);
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-        
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-gray);
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        
-        .nav-links a:hover {
-            color: var(--accent);
-        }
-        
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 2px;
-            bottom: -4px;
-            left: 0;
-            background-color: var(--primary);
-            transition: width 0.3s ease;
-        }
-        
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-        
-        /* Hero Section */
-        .hero {
-            padding: 8rem 0 4rem;
-            background: var(--background);
-        }
-        
-        .hero-content {
+
+        /* --- Header --- */
+        .header-grid {
             display: grid;
-            grid-template-columns: 1fr 200px;
-            gap: 4rem;
-            align-items: center;
-        }
-        
-        .hero-text h1 {
-            font-size: 3rem;
-            font-weight: 800;
-            color: var(--accent);
-            margin-bottom: 1rem;
-            line-height: 1.1;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 1s ease 0.2s forwards;
-            background: linear-gradient(90deg, var(--accent), var(--primary));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .hero-text p {
-            font-size: 1.1rem;
-            color: var(--text-gray);
-            margin-bottom: 2rem;
-            line-height: 1.7;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 1s ease 0.4s forwards;
-        }
-        
-        .hero-links {
-            display: flex;
-            gap: 1.5rem;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: fadeInUp 1s ease 0.6s forwards;
-        }
-        
-        .hero-links a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        
-        .hero-links a:hover {
-            color: var(--accent);
-        }
-        
-        .hero-links a::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 1px;
-            bottom: -2px;
-            left: 0;
-            background-color: var(--primary);
-            transition: width 0.3s ease;
-        }
-        
-        .hero-links a:hover::after {
-            width: 100%;
-        }
-        
-        .hero-image {
-            display: flex;
-            justify-content: center;
-            opacity: 0;
-            transform: scale(0.9);
-            animation: fadeInScale 1s ease 0.8s forwards;
-        }
-        
-        .hero-image img {
-            width: 280px;
-            height: 280px;
-            border-radius: 20px;
-            object-fit: contain;
-            box-shadow: var(--shadow-xl);
-            transition: all 0.3s ease;
-        }
-        
-        .hero-image img:hover {
-            transform: scale(1.02);
-            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-        }
-        
-        /* Section Styles */
-        section {
-            padding: 4rem 0;
-        }
-        
-        section:nth-child(even) {
-            background-color: var(--light-gray);
-        }
-        
-        .section-header {
-            margin-bottom: 3rem;
-        }
-        
-        .section-header h2 {
-            font-size: 2.25rem;
-            font-weight: 700;
-            color: var(--dark);
-            margin-bottom: 0.5rem;
-            position: relative;
-            display: inline-block;
-        }
-        
-        .section-header h2::after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent), var(--primary));
-            transform: scaleX(0);
-            transition: transform 0.8s ease;
-        }
-        
-        .section-header.animate h2::after {
-            transform: scaleX(1);
-        }
-        
-        .section-header p {
-            color: var(--text-gray);
-            font-size: 1rem;
-            margin-top: 1rem;
-        }
-        
-        /* Work Experience */
-        .work-item {
-            background: var(--white);
-            padding: 2rem;
-            border-radius: 16px;
-            box-shadow: var(--shadow-md);
-            margin-bottom: 2rem;
-            border-left: 4px solid var(--primary);
-            transition: all 0.3s ease;
-            opacity: 0;
-            transform: translateY(30px);
-            display: grid;
-            grid-template-columns: 200px 1fr;
-            gap: 1.5rem;
+            grid-template-columns: 70% 30%;
+            gap: 40px;
+            margin-bottom: 60px;
             align-items: start;
         }
 
-        .work-item.animate {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .work-item:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        .work-content {
-            grid-column: 2;
-        }
-
-        .work-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .work-header h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--dark);
-            margin-bottom: 0.25rem;
-        }
-
-        .work-role {
-            color: var(--primary);
+        .bio-text h1 {
+            font-size: 2.5rem;
             font-weight: 600;
-            font-size: 1rem;
-        }
-
-        .work-date {
-            color: var(--text-gray);
-            font-weight: 600;
-            font-size: 0.9rem;
-            background: var(--light-gray);
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            white-space: nowrap;
-        }
-
-        .work-item p, .work-item ul {
-            color: var(--text-gray);
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-
-        .work-item ul {
-            padding-left: 1.5rem;
-        }
-
-        .work-item li {
             margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
         }
 
-        .work-icon {
-            width: 200px;
-            height: 200px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: var(--shadow-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--light-gray);
-            transition: all 0.3s ease;
-            flex-shrink: 0;
+        .bio-text .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
         }
 
-        .work-icon img {
+        .social-links {
+            margin-top: 1.5rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+        }
+        .social-links a { margin-right: 15px; font-weight: 500; }
+
+        .profile-photo {
             width: 100%;
-            height: 100%;
+            border-radius: 50%; 
+            aspect-ratio: 1/1;
             object-fit: cover;
-            transition: transform 0.3s ease;
+            /* Optional: Add a subtle fade-in for the image specifically */
+            animation: fadeInImage 1s ease-out;
         }
 
-        .work-item:hover .work-icon img {
-            transform: scale(1.1);
-        }
-
-        /* Responsive adjustments for work items */
-        @media (max-width: 968px) {
-            .work-item {
-                grid-template-columns: 80px 1fr;
-                gap: 1.2rem;
-            }
-            
-            .work-content {
-                grid-column: 2;
-            }
-            
-            .work-icon {
-                width: 80px;
-                height: 80px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .work-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .work-item {
-                grid-template-columns: 1fr;
-                text-align: left;
-            }
-            
-            .work-icon {
-                margin: 0 auto;
-                width: 200px;
-                height: 200px;
-            }
-            
-            .work-content {
-                grid-column: 1;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .work-item {
-                padding: 1.5rem;
-            }
-            
-            .work-icon {
-                width: 80px;
-                height: 80px;
-            }
-        }
-                
-        /* Awards */
-        .awards-table {
-            background: var(--white);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: var(--shadow-md);
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.6s ease;
-        }
+        /* --- Section Styling --- */
+        section { margin-bottom: 80px; }
         
-        .awards-table.animate {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .awards-row {
-            display: grid;
-            grid-template-columns: 100px 1fr;
-            padding: 1.5rem 2rem;
-            border-bottom: 1px solid var(--medium-gray);
-            transition: all 0.3s ease;
-        }
-        
-        .awards-row:last-child {
-            border-bottom: none;
-        }
-        
-        .awards-row:hover {
-            background-color: var(--light-gray);
-            transform: translateX(8px);
-        }
-        
-        .award-year {
-            font-weight: 700;
-            color: var(--primary);
-            font-size: 0.9rem;
-        }
-        
-        .award-title {
+        .section-title {
+            font-size: 1.5rem;
             font-weight: 600;
-            color: var(--dark);
-            font-size: 0.95rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            letter-spacing: -0.01em;
         }
-        
-        /* Research */
-        .research-grid {
+
+        /* --- Research Papers (Square Layout) --- */
+        .paper-row {
             display: grid;
-            gap: 2rem;
+            grid-template-columns: 220px 1fr; 
+            gap: 35px;
+            margin-bottom: 50px;
+            align-items: start;
         }
-        
-        .research-item {
-            background: var(--white);
-            padding: 2rem;
-            border-radius: 16px;
-            box-shadow: var(--shadow-md);
-            transition: all 0.3s ease;
-            opacity: 0;
-            transform: translateY(30px);
-            display: flex;
-            flex-direction: row;
-            gap: 3rem;
-            align-items: flex-start;
+
+        .paper-media {
+            position: relative;
+            width: 100%;
+            height: 220px; /* Square */
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            background: #f0f0f0; 
         }
-        
-        .research-item.animate {
-            opacity: 1;
-            transform: translateY(0);
+
+        .paper-media img, .paper-media video {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; 
+            display: block;
         }
-        
-        .research-item:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .research-item h3 {
+
+        .paper-content { padding-top: 5px; }
+
+        .paper-content h3 {
             font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--dark);
-            margin-bottom: 0.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
             line-height: 1.3;
         }
-        
-        .research-venue {
+
+        .paper-venue {
+            font-size: 0.9rem;
             color: var(--accent);
             font-weight: 600;
-            font-size: 0.9rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .research-links {
-            display: flex;
-            gap: 0.5rem;
-            margin: 0.5rem 0;
-            flex-wrap: wrap;
-        }
-        
-        .research-links a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.9rem;
-            padding: 0.25rem 0.25rem;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-        
-        .research-links a:hover {
-            background-color: var(--light-gray);
-            color: var(--accent);
-        }
-        
-        .research-item p {
-            color: var(--text-gray);
-            line-height: 1.6;
-        }
-        
-        .research-contributions {
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid var(--medium-gray);
-        }
-        
-        .research-contributions strong {
-            color: var(--dark);
-            display: block;
-            margin-bottom: 0.5rem;
+            font-family: 'Inter', sans-serif;
+            margin-bottom: 12px;
         }
 
-        /* Video/Image container for research items */
-        .research-video, .research-image {
-            flex: 0 0 200px;
-            width: 200px;
-            height: 200px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            flex-shrink: 0;
+        .paper-desc {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 15px;
         }
 
-        .research-video video, .research-image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center;
-        display: block;
-    }
-
-        /* Remove old first-child specific styles since all items now use this layout */
-        .research-content-wrapper {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
+        .paper-links {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
         }
+        .paper-links a {
+            margin-right: 12px;
+            color: var(--text-light);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        .paper-links a:hover { color: var(--accent); }
 
-        /* Collapsible contributions */
+        /* --- Contributions Toggle --- */
+        .contributions-wrapper { margin-top: 10px; }
+        
         .contributions-toggle {
+            font-size: 0.85rem;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-light);
             cursor: pointer;
             user-select: none;
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            color: var(--dark);
-            font-weight: 600;
-            margin-top: 1rem;
-            padding: 0.5rem 0;
-            transition: color 0.3s ease;
+            gap: 5px;
+            transition: color 0.2s;
         }
-
-        .contributions-toggle:hover {
-            color: var(--accent);
-        }
+        
+        .contributions-toggle:hover { color: var(--accent); }
 
         .contributions-toggle::before {
-            content: '▶';
+            content: '▸'; 
             display: inline-block;
-            transition: transform 0.3s ease;
-            font-size: 0.8em;
+            transition: transform 0.2s ease;
         }
-
-        .contributions-toggle.active::before {
-            transform: rotate(90deg);
-        }
+        
+        .contributions-toggle.active::before { transform: rotate(90deg); }
 
         .contributions-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .contributions-content.active {
-            max-height: 500px;
-        }
-
-        .contributions-text {
-            padding-top: 0.5rem;
-            color: var(--text-gray);
-            line-height: 1.6;
-        }
-
-        #linkedin {
-            color: var(--primary);
-            text-decoration: underline;
-            font-weight: 500;
-        }
-        #linkedin:hover {
-            color: var(--accent);
-        }
-        
-        /* Footer */
-        footer {
-            background-color: var(--dark);
-            color: var(--light-gray);
-            padding: 2rem 0;
-            text-align: center;
-        }
-        
-        footer p {
+            display: none;
             font-size: 0.9rem;
-            opacity: 0.8;
+            color: #444; 
+            background: #f9f9f9;
+            padding: 10px 15px;
+            margin-top: 8px;
+            border-left: 3px solid #eee;
+            border-radius: 0 4px 4px 0;
+            line-height: 1.5;
         }
         
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        /* Dropdown fade in (Moves DOWN) */
+        .contributions-content.active { display: block; animation: contribFadeIn 0.3s; }
+
+        /* --- Other Lists --- */
+        .news-list { list-style: none; }
+        .news-list li {
+            display: grid;
+            grid-template-columns: 80px 1fr;
+            margin-bottom: 12px;
         }
-        
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+        .news-date {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            padding-top: 4px;
         }
+
+        .work-grid { display: grid; gap: 25px; }
+        .work-item {
+            display: grid;
+            grid-template-columns: 60px 1fr;
+            gap: 20px;
+        }
+        .work-logo img {
+            width: 100%;
+            border-radius: 8px;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .work-details h4 { font-weight: 600; font-size: 1.1rem; }
+        .work-details .role { font-family: 'Inter', sans-serif; font-size: 0.9rem; color: var(--text-muted); }
+
+        /* --- Fun Section --- */
+        .fun-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+        .fun-item h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 5px;
+        }
+        .fun-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        /* --- Animations --- */
         
-        /* Responsive */
+        /* Page Load: Moves UP and fades in */
+        @keyframes pageEnter {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Contributions Dropdown: Moves DOWN */
+        @keyframes contribFadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInImage {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- Responsive --- */
         @media (max-width: 768px) {
-            .container {
-                padding: 0 1rem;
-            }
+            .header-grid { grid-template-columns: 1fr; gap: 20px; }
+            .header-grid .profile-photo { width: 150px; margin: 0 auto; display: block; }
+            .bio-text { text-align: center; }
+            .social-links { justify-content: center; display: flex; flex-wrap: wrap; }
             
-            nav .container {
-                padding: 1rem;
-            }
-            
-            .nav-links {
-                display: none;
-            }
-            
-            .hero-content {
+            .paper-row {
                 grid-template-columns: 1fr;
-                gap: 2rem;
-                text-align: center;
+                gap: 15px;
             }
-            
-            .hero-text h1 {
-                font-size: 2.5rem;
-            }
-            
-            .work-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .awards-row {
-                grid-template-columns: 80px 1fr;
-                padding: 1rem;
-            }
-            
-            .hero-image img {
-                width: 240px;
-                height: 240px;
+            .paper-media {
+                width: 120px;
+                height: 120px;
+                float: left;
+                margin-right: 20px;
+                margin-bottom: 10px;
             }
 
-            .research-item {
-                flex-direction: column;
-            }
-
-            .research-video, .research-image {
-                flex: 1 1 auto;
-                width: 100%;
-                height: auto;
-                aspect-ratio: 1/1;
-            }
-        }
-        
-        /* Intersection Observer Classes */
-        .fade-in-section {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.6s ease;
-        }
-        
-        .fade-in-section.animate {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        /* Smooth scrolling */
-        html {
-            scroll-behavior: smooth;
-        }
-        
-        /* Link styling */
-        a {
-            color: var(--primary);
-            transition: color 0.3s ease;
-            text-decoration: none;
-        }
-        
-        a:hover {
-            color: var(--accent);
+            .fun-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="container">
-           <div class="logo"><a href="index.html">Jasmine Shone</a></div>
-            <ul class="nav-links">
-                <li><a href="#experience">Work Experience</a></li>
-                <li><a href="#awards">Awards</a></li>
-                <li><a href="#research">Research</a></li>
-                <li><a href="blog.html">Blog</a></li>
-                <a href="https://docs.google.com/document/d/1IotUcyU1DDuTVccRchE9AyiylOuC9F7ZL-lh7w6dJnM/edit?usp=sharing">CV</a>
-                <li><a href="/cdn-cgi/l/email-protection#ea808b99998285848faa87839ec48f8e9f">Contact</a></li>
+
+    <div class="container">
+        
+        <div class="header-grid">
+            <div class="bio-text">
+                <h1>Jasmine Shone</h1>
+                <div class="subtitle sans">Student + Researcher at MIT</div>
+                <p>
+                    Hi! I'm Jasmine Shone, a current student at MIT. This summer, I was a SWE Intern at Meta working on a computer vision model launch at Meta Superintelligence Labs and large-scale load testing at Instagram.
+                </p>
+                <p>
+                    I am currently researching at the <a href="#">Kaiming He Lab</a>, focusing on effective tokenization/representations for large scale chaotic system data in combination with latent diffusion models. I'm one of the co-leads for AI @ MIT Reading Group (and have been in the group for a total of 3 semesters now).
+                </p>
+                <div class="social-links">
+                    <a href="/cdn-cgi/l/email-protection#ea808b99998285848faa87839ec48f8e9f">Email</a>
+                    <a href="https://docs.google.com/document/d/1IotUcyU1DDuTVccRchE9AyiylOuC9F7ZL-lh7w6dJnM/edit?usp=sharing">CV</a>
+                    <a href="https://github.com/jasshone/">Github</a>
+                    <a href="https://www.linkedin.com/in/jasmine-shone-a90853149/">LinkedIn</a>
+                    <a href="blog.html">Blog</a>
+                </div>
+            </div>
+            <div class="profile-photo-container">
+                <img src="images/headshot.png" alt="Jasmine Shone" class="profile-photo">
+            </div>
+        </div>
+
+        <section id="research">
+            <h2 class="section-title sans">Research</h2>
+            
+            <div class="paper-row">
+                <div class="paper-media">
+                    <img src="images/pretty.gif" alt="Latent Diffusion">
+                </div>
+                <div class="paper-content">
+                    <h3>Latent Diffusion for PDEs</h3>
+                    <div class="paper-venue">In Progress</div>
+                    <p class="paper-desc">Modeling cool physics</p>
+                    <div class="contributions-wrapper">
+                        <div class="contributions-toggle">Contributions</div>
+                        <div class="contributions-content">
+                            Building out pipeline, running experiments
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="paper-row">
+                <div class="paper-media">
+                    <video autoplay loop muted playsinline>
+                        <source src="images/SAM3D1.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="paper-content">
+                    <h3><a href="https://ai.meta.com/sam3d/" class="title-link">SAM 3D @ Meta Superintelligence</a></h3>
+                    <div class="paper-venue">In Submission</div>
+                    <p class="paper-desc">2D to 3D objects!</p>
+                    <div class="paper-links">
+                        <a href="https://ai.meta.com/sam3d/">launch</a>
+                        <a href="https://ai.meta.com/research/publications/sam-3d-3dfy-anything-in-images/">paper</a>
+                    </div>
+                    <div class="contributions-wrapper">
+                        <div class="contributions-toggle">Contributions</div>
+                        <div class="contributions-content">
+                            Designing and implementing a modified version of the SuGaR algorithm, reducing runtime from 30 m to ~1 m 40 s. 
+                            Proposing and implementing pointcloud downsampling algorithm which reduces points by up to an 12% average.
+                            Created parallelized script to improve training efficiency through data cleaning, detecting 6+% of corrupted data.
+                            Implemented baseline for evaluation metric and created easy-to-follow jupyter notebook.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="paper-row">
+                <div class="paper-media">
+                    <img src="images/Beyond_ICON.png" alt="Beyond I-Con">
+                </div>
+                <div class="paper-content">
+                    <h3><a href="https://www.arxiv.org/abs/2509.04734" class="title-link">Beyond I-Con: Exploring a New Dimension of Distance Measures</a></h3>
+                    <div class="paper-venue">NeurIPS NeurReps Workshop 2025 · NeurIPS WiML Workshop 2025</div>
+                    <p class="paper-desc">
+                        We extend the I-Con framework to discover new losses which achieve state-of-the-art results on clustering and supervised contrastive learning.
+                    </p>
+                    <div class="paper-links">
+                        <a href="https://www.arxiv.org/abs/2509.04734">arXiv</a>
+                        <a href="markdown-viewer.html?file=posts%2F2025-08-19-Beyond-I-Con.md&title=Beyond%20I-Con%3A%20Exploring%20a%20New%20Dimension%20of%20Distance%20Measures%20in%20Representation%20Learning">Blog</a>
+                    </div>
+                    <div class="contributions-wrapper">
+                        <div class="contributions-toggle">Contributions</div>
+                        <div class="contributions-content">
+                            Designed, implemented, and evaluated loss functions based on the I-Con framework. Conducted analysis on experimental results.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="paper-row">
+                <div class="paper-media">
+                    <img src="images/embeddings.png" alt="Embeddings">
+                </div>
+                <div class="paper-content">
+                    <h3>Text-Invariant Similarity Learning</h3>
+                    <p class="paper-desc">
+                        We create a new paradigm of image-pair similarity learning conditioned on text descriptions.
+                    </p>
+                    <div class="paper-links">
+                        <a href="markdown-viewer.html?file=posts%2F2025-08-20-Better-Notions-Of-Similarity.md&title=Better%20Notions%20of%20Similarity%20for%20Image-image%20Contrastive%20Learning">Blog</a>
+                    </div>
+                    <div class="contributions-wrapper">
+                        <div class="contributions-toggle">Contributions</div>
+                        <div class="contributions-content">
+                            Designed and implemented image-pair similarity annotation pipeline.
+                            Designed, implemented, and explored different experimental setups and loss functions.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="paper-row">
+                <div class="paper-media">
+                    <video autoplay loop muted playsinline>
+                        <source src="images/pour_obj.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="paper-content">
+                    <h3><a href="https://kalm-il.github.io/" class="title-link">Keypoint Abstraction using Large Models for Object-Relative Imitation Learning</a></h3>
+                    <div class="paper-venue">ICRA 2025 · CoRL LangRob Best Paper 2024</div>
+                    <p class="paper-desc">
+                        Utilizing priors from Vision-language models and image features to generalize effectively across object poses, camera viewpoints, and object instances with only 10 demonstrations.
+                    </p>
+                    <div class="paper-links">
+                        <a href="https://arxiv.org/abs/2410.23254">arXiv</a>
+                        <a href="https://kalm-il.github.io/">Project</a>
+                    </div>
+                    <div class="contributions-wrapper">
+                        <div class="contributions-toggle">Contributions</div>
+                        <div class="contributions-content">
+                            Trained multimodal models utilizing pointcloud encoders, object-wise transformers, and vision foundation models, improving evaluation performance by 27.5%<br>
+                            Created and designed keypoint proposal pipeline with specialized VLM prompting SAM, furthest point sampling, mark-based prompting, RANSAC, and point cloud clustering
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="paper-row">
+                <div class="paper-media">
+                    <img src="images/Datathon.png" alt="Datathon">
+                </div>
+                <div class="paper-content">
+                    <h3>The Correlation of Regional Gas Prices with Unemployment</h3>
+                    <div class="paper-venue">Citadel Women's Datathon Winning Report 2024</div>
+                    <p class="paper-desc">
+                        Are fluctuations in gas prices predictive of unemployment rates and how do regional differences in mass transit and gasoline production affect this trend?
+                    </p>
+                    <div class="contributions-wrapper">
+                        <div class="contributions-toggle">Contributions</div>
+                        <div class="contributions-content">
+                            Coming up with the initial research question + insight to use multiple additional datasets beyond the ones we were provided in the competition. Also worked on most of the stats/modelling work (Granger Causality, ADF, VAR modelling).
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="paper-row">
+                <div class="paper-media">
+                    <video autoplay loop muted playsinline>
+                        <source src="images/sketch.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="paper-content">
+                    <h3><a href="https://yael-vinker.github.io/sketch-agent/" class="title-link">SketchAgent: Language-Driven Sequential Sketch Generation</a></h3>
+                    <div class="paper-venue">CVPR 2025</div>
+                    <p class="paper-desc">
+                        We introduce SketchAgent, a novel framework for generating sequential sketches from language prompts.
+                    </p>
+                    <div class="paper-links">
+                        <a href="https://yael-vinker.github.io/sketch-agent/">Project</a>
+                    </div>
+                    <div class="contributions-wrapper">
+                        <div class="contributions-toggle">Contributions</div>
+                        <div class="contributions-content">
+                            Worked on moving the LLM inference pipeline to a locally hosted version of Llama Vision 3.2 11B and Llama 3.2 90B. Learned about quantization, multi-gpu inference, and prompting techniques.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="paper-row">
+                <div class="paper-media">
+                    <img src="images/app_creation.png" alt="App Creation">
+                </div>
+                <div class="paper-content">
+                    <h3>Systematic Optimization of App Generation Few Shot Learning</h3>
+                    <div class="paper-venue">RSI 2022 · Regeneron STS Top 300</div>
+                    <p class="paper-desc">
+                        We create an LLM in-context learning pipeline to systematically optimize prompt token length, few-shot selection, and ordering.
+                    </p>
+                    <div class="paper-links">
+                        <a href="https://actascientific.com/ASCS/pdf/ASCS-05-0448.pdf">Paper</a>
+                    </div>
+                    <div class="contributions-wrapper">
+                        <div class="contributions-toggle">Contributions</div>
+                        <div class="contributions-content">
+                            Developed the p-mRMR algorithm and prompt creation framework, designed and wrote an evaluation suite of test applications and performed manual error evaluation of generated apps.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="paper-row">
+                <div class="paper-media">
+                    <img src="images/fundus1.png" alt="Fundus">
+                </div>
+                <div class="paper-content">
+                    <h3>Stable Diffusion on Glaucoma Fundus Images in Low-Data Settings</h3>
+                    <div class="paper-venue">Computer Vision Final Project</div>
+                    <p class="paper-desc">
+                        We improve stable diffusion's ability to generate high-quality fundus images by finetuning on an extremely small dataset of 170 images.
+                    </p>
+                    <div class="contributions-wrapper">
+                        <div class="contributions-toggle">Contributions</div>
+                        <div class="contributions-content">
+                            Worked on designing the project/experiments, training the model, doing evals with resnet, and baselines (GANs)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="experience">
+            <h2 class="section-title sans">Experience</h2>
+            <div class="work-grid">
+                <div class="work-item">
+                    <div class="work-logo">
+                        <img src="images/labubu-edited.png" alt="Meta">
+                    </div>
+                    <div class="work-details">
+                        <h4>Meta <span class="role">/ SWE Intern</span></h4>
+                        <p class="desc" style="color:#555; margin-top:5px; font-size:0.95rem;">Meta Superintelligence Labs (Vision Model Launch) & Instagram (Load Testing).</p>
+                    </div>
+                </div>
+                <div class="work-item">
+                    <div class="work-logo">
+                        <img src="images/stocks.png" alt="HRT">
+                    </div>
+                    <div class="work-details">
+                        <h4>Hudson River Trading <span class="role">/ Core SWE & Algo Intern</span></h4>
+                        <p class="desc" style="color:#555; margin-top:5px; font-size:0.95rem;">Built C++ infra for live trading; Deployed profitable trading bot for Brazilian equities.</p>
+                    </div>
+                </div>
+                <div class="work-item">
+                    <div class="work-logo">
+                        <img src="images/robot_square.png" alt="MIT">
+                    </div>
+                    <div class="work-details">
+                        <h4>MIT LIS Lab <span class="role">/ Research Assistant</span></h4>
+                        <p class="desc" style="color:#555; margin-top:5px; font-size:0.95rem;">Robotics generalization research using keypoint abstraction.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="awards">
+            <h2 class="section-title sans">Awards</h2>
+            <ul class="news-list">
+                <li><span class="news-date">2025</span> <span>Neo Finalist</span></li>
+                <li><span class="news-date">2024</span> <span>HackMIT Challenge Track Winner</span></li>
+                <li><span class="news-date">2024</span> <span>Citadel Women's Datathon First Place Report</span></li>
+                <li><span class="news-date">2023</span> <span>Atlas Fellow & Regeneron STS Scholar</span></li>
+                <li><span class="news-date">2022</span> <span>RSI Scholar</span></li>
+                <li><span class="news-date">2022</span> <span>Scholastic Arts and Writing National Gold/Silver</span></li>
+                <li><span class="news-date">2022</span> <span>NSDA Debate National Runner Up</span></li>
             </ul>
-        </div>
-    </nav>
+        </section>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <div class="hero-text">
-                    <h1>Jasmine Shone</h1>
-                    <p>Hi! I'm Jasmine Shone, a current student at MIT. This summer, I was a SWE Intern at Meta working on a computer vision model launch at Meta Superintelligence Labs and large-scale load testing at Instagram.</p>
-                    <p>I am currently researching at the Kaiming He Lab, focusing on effective tokenization/representations for large scale chaotic system data in combination with latent diffusion models. I'm one of the co-leads for AI @ MIT Reading Group (and have been in the group for a total of 3 semesters now). </p>
-                    <p>I enjoy learning about and exploring lots of different fields. Within AI that means Computer Vision, NLP, medical ML, deep learning, and robotics. Outside of AI that means data science, full-stack development, infrastructure, game development, and quantitative finance. In my free time, I enjoy singing/composing music, as well as writing short stories and personal essays.</p>
-                    <div class="hero-links">
-                        <a href="#experience">Work Experience</a>
-                        <a href="#awards">Awards</a>
-                        <a href="#research">Research</a>
-                        <a href="#fun">Fun</a>
-                        <a href="blog.html">Blog</a>
-                        <a href="/cdn-cgi/l/email-protection#6c060d1f1f040302092c01051842090819">Email</a>
-                        <a href="https://github.com/jasshone/">Github</a>
-                    </div>
-                </div>
-                <div class="hero-image">
-                    <img src="images/headshot.png" alt="Jasmine Shone profile photo">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Work Experience -->
-    <section id="experience">
-      <div class="container">
-          <div class="section-header fade-in-section">
-              <h2>Work Experience</h2>
-              <p>For a full list of my work experiences, please see my <a href="https://www.linkedin.com/in/jasmine-shone-a90853149/" id="linkedin">LinkedIn</a> profile.</p>
-          </div>
-          
-          <div class="work-item fade-in-section">
-              <div class="work-icon">
-                <img src="images/labubu-edited.png" alt="Meta workplace">
-              </div>
-              <div class="work-content">
-                  <div class="work-header">
-                      <div>
-                          <h3>Meta</h3>
-                          <div class="work-role">Software Engineering Intern</div>
-                      </div>
-                      <div class="work-date">Summer 2025</div>
-                  </div>
-                  <p><strong>Meta Superintelligence Labs:</strong> Working on a new vision model launch.</p>
-                  <p><strong>Instagram:</strong> Working on large-scale load testing infrastructure. </p>
-              </div>
-              
-          </div>
-          
-          <div class="work-item fade-in-section">
-              <div class="work-icon">
-                  <img src="images/stocks.png" alt="Trading algorithms visualization">
-              </div>
-              <div class="work-content">
-                  <div class="work-header">
-                      <div>
-                          <h3>Hudson River Trading</h3>
-                          <div class="work-role">4-Week Winter Internship in Core (SWE) & Algo Development (QR)</div>
-                      </div>
-                      <div class="work-date">Winter 2025</div>
-                  </div>
-                  <p><strong>Core (SWE):</strong> Completed five C++ projects focused on building infrastructure for live trading systems. Gained hands-on experience with performance optimization techniques, including efficient data structures and memory management. Actively participated in code reviews to improve code quality and robustness.</p>
-                  <p><strong>Algo Development:</strong> Designed, programmed, and deployed a live trading bot for Brazilian equities that achieved net positive returns in production. Applied data science techniques to train predictive models, evaluate performance metrics, and effectively communicate insights to stakeholders.</p>
-              </div>
-              
-          </div>
-          
-          <div class="work-item fade-in-section">
-            <div class="work-icon">
-              <img src="images/robot_square.png" alt="Robotics research at MIT">
-            </div>
-              <div class="work-content">
-                  <div class="work-header">
-                      <div>
-                          <h3>MIT Learning and Intelligent Systems Lab</h3>
-                          <div class="work-role">Research Assistant</div>
-                      </div>
-                      <div class="work-date">Summer 2024</div>
-                  </div>
-                  <p>Making robots generalize across varying object poses, camera views, and object instances with only 10 demonstrations.</p>
-              </div>
-              
-          </div>
-      </div>
-  </section>
-
-    <!-- Awards -->
-    <section id="awards">
-        <div class="container">
-            <div class="section-header fade-in-section">
-                <h2>Awards and Accolades</h2>
-            </div>
-            <div class="awards-table fade-in-section">
-                <div class="awards-row">
-                    <div class="award-year">2025</div>
-                    <div class="award-title">Neo Finalist</div>
-                </div>
-                <div class="awards-row">
-                    <div class="award-year">2024</div>
-                    <div class="award-title">HackMIT Challenge Track Winner</div>
-                </div>
-                <div class="awards-row">
-                    <div class="award-year">2024</div>
-                    <div class="award-title">Citadel Women's Datathon First Place Report</div>
-                </div>
-                <div class="awards-row">
-                    <div class="award-year">2024</div>
-                    <div class="award-title">Honorable Mention MIT Web.Lab Web Development Competition (Top 7)</div>
-                </div>
-                <div class="awards-row">
-                    <div class="award-year">2023</div>
-                    <div class="award-title">Atlas Fellow</div>
-                </div>
-                <div class="awards-row">
-                    <div class="award-year">2023</div>
-                    <div class="award-title">Regeneron STS Scholar</div>
-                </div>
-                <div class="awards-row">
-                    <div class="award-year">2022</div>
-                    <div class="award-title">Research Science Institute Scholar</div>
-                </div>
-                <div class="awards-row">
-                    <div class="award-year">2023</div>
-                    <div class="award-title">2x AIME Qualifier, Top 6 in Ohio HS Mathematics Invitational Olympiad Cipher Round</div>
-                </div>
-                <div class="awards-row">
-                    <div class="award-year">2022</div>
-                    <div class="award-title">Scholastic Arts and Writing National Gold and Silver Medal in writing</div>
-                </div>
-                <div class="awards-row">
-                    <div class="award-year">2022</div>
-                    <div class="award-title">NSDA Extemporaneous Debate National Runner Up</div>
-                </div>
-                <div class="awards-row">
-                    <div class="award-year">2021</div>
-                    <div class="award-title">FPS Scenario Writing (Sci-Fi competition) 3rd, 7th internationally</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Research -->
-    <section id="research">
-        <div class="container">
-            <div class="section-header fade-in-section">
-                <h2>Research</h2>
-                <p>I'm currently interested in world-modelling and 3D generation. Relatedly, I'm interested in retrieval, memory, and context— making models that remember and see beyond immediate inputs/tasks. I'm also interested in intelligence which comes from compression, with feature/representation learning being a subset of that interest. Within representation learning, I've been curious recently about vision model representations and cross-modality information loss. </p>
-            </div>
-            <div class="research-grid">
-                <div class="research-item fade-in-section">
-                    <div class="research-video">
-                        <image src="images/pretty.gif"/>
-                        
-                    </div>
-                    <div class="research-content-wrapper">
-                        <h3>Latent Diffusion for PDEs</h3>
-                        <div class="research-venue">In Progress</div>
-                        <p>Modeling cool physics</p>
-                        <div class="contributions-toggle">
-                            Contributions
-                        </div>
-                        <div class="contributions-content">
-                            <div class="contributions-text">
-                                Building out pipeline, running experiments
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="research-item fade-in-section">
-                    <div class="research-video">
-                        <video controls autoplay loop muted playsinline>
-                            <source src="images/SAM3D1.mp4" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
-                    <div class="research-content-wrapper">
-                        <h3>SAM 3D @ Meta Superintelligence</h3>
-                        <div class="research-venue">In Submission</div>
-                        <div class="research-links">
-                            <a href="https://ai.meta.com/sam3d/">launch</a>
-                            <a href="https://ai.meta.com/research/publications/sam-3d-3dfy-anything-in-images/">paper</a>
-                        </div>
-                        <p>2D to 3D objects!</p>
-                        <div class="contributions-toggle">
-                            Contributions
-                        </div>
-                        <div class="contributions-content">
-                            <div class="contributions-text">
-                                Designing and implementing a modified version of the SuGaR algorithm, reducing runtime from 30 m to ~1 m 40 s. 
-                                Proposing and implementing pointcloud downsampling algorithm which reduces points by up to an 12% average.
-                                Created parallelized script to improve training efficiency through data cleaning, detecting 6+% of corrupted data.
-                                Implemented baseline for evaluation metric and created easy-to-follow jupyter notebook.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="research-item fade-in-section">
-                    <div class="research-image">
-                        <img src="images/Beyond_ICON.png" alt="Beyond I-Con">
-                    </div>
-                    <div class="research-content-wrapper">
-                        <h3>Beyond I-Con: Exploring a New Dimension of Distance Measures in Representation Learning</h3>
-                        <div class="research-venue">NeurIPS NeurReps Workshop 2025, NeurIPS WiML Workshop 2025, In Submission</div>
-                        <div class="research-links">
-                            <a href="markdown-viewer.html?file=posts%2F2025-08-19-Beyond-I-Con.md&title=Beyond%20I-Con%3A%20Exploring%20a%20New%20Dimension%20of%20Distance%20Measures%20in%20Representation%20Learning">blog</a>
-                            <a href="https://www.arxiv.org/abs/2509.04734">arXiv</a>
-                        </div>
-                        <p>We extend the I-Con framework to discover new losses which achieve state-of-the-art results on clustering and supervised contrastive learning.</p>
-                        <div class="contributions-toggle">
-                            Contributions
-                        </div>
-                        <div class="contributions-content">
-                            <div class="contributions-text">
-                                Designed, implemented, and evaluated loss functions based on the I-Con framework. Conducted analysis on experimental results.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="research-item fade-in-section">
-                    <div class="research-image">
-                        <img src="images/embeddings.png" alt="Text-Invariant Similarity Learning">
-                    </div>
-                    <div class="research-content-wrapper">
-                        <h3>Text-Invariant Similarity Learning</h3>
-                        <div class="research-links">
-                            <a href="markdown-viewer.html?file=posts%2F2025-08-20-Better-Notions-Of-Similarity.md&title=Better%20Notions%20of%20Similarity%20for%20Image-image%20Contrastive%20Learning">blog</a>
-                        </div>
-                        <p>We create a new paradigm of image-pair similarity learning conditioned on text descriptions.</p>
-                        <div class="contributions-toggle">
-                            Contributions
-                        </div>
-                        <div class="contributions-content">
-                            <div class="contributions-text">
-                                Designed and implemented image-pair similarity annotation pipeline.
-                                Designed, implemented, and explored different experimental setups and loss functions.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="research-item fade-in-section">
-                    <div class="research-video">
-                        <video controls autoplay loop muted playsinline>
-                            <source src="images/pour_obj.mp4" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
-                    <div class="research-content-wrapper">
-                        <h3>Keypoint Abstraction using Large Models for Object-Relative Imitation Learning</h3>
-                        <div class="research-venue">ICRA 2025, CoRL LangRob Workshop Best Paper 2024</div>
-                        <div class="research-links">
-                            <a href="https://kalm-il.github.io/">project page</a>
-                            <a href="https://arxiv.org/abs/2410.23254">arXiv</a>
-                        </div>
-                        <p>Utilizing priors from Vision-language models and image features to generalize effectively across object poses, camera viewpoints, and object instances with only 10 demonstrations.</p>
-                        <div class="contributions-toggle">
-                            Contributions
-                        </div>
-                        <div class="contributions-content">
-                            <div class="contributions-text">
-                                Trained multimodal models utilizing pointcloud encoders, object-wise transformers, and vision foundation models, improving evaluation performance by 27.5%<br>
-                                Created and designed keypoint proposal pipeline with specialized VLM prompting SAM, furthest point sampling, mark-based prompting, RANSAC, and point cloud clustering
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="research-item fade-in-section">
-                    <div class="research-image">
-                        <img src="images/Datathon.png" alt="Gas Prices Research">
-                    </div>
-                    <div class="research-content-wrapper">
-                        <h3>The Correlation of Regional Gas Prices with Unemployment</h3>
-                        <div class="research-venue">Citadel Women's Datathon Winning Report 2024</div>
-                        <p>Are fluctuations in gas prices predictive of unemployment rates and how do regional differences in mass transit and gasoline production affect this trend?</p>
-                        <div class="contributions-toggle">
-                            Contributions
-                        </div>
-                        <div class="contributions-content">
-                            <div class="contributions-text">
-                                Coming up with the initial research question + insight to use multiple additional datasets beyond the ones we were provided in the competition. Also worked on most of the stats/modelling work (Granger Causality, ADF, VAR modelling).
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="research-item fade-in-section">
-                    <div class="research-video">
-                        <video controls autoplay loop muted playsinline>
-                            <source src="images/sketch.mp4" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                    </div>
-                    <div class="research-content-wrapper">
-                        <h3>SketchAgent: Language-Driven Sequential Sketch Generation</h3>
-                        <div class="research-venue">CVPR 2025</div>
-                        <div class="research-links">
-                            <a href="https://yael-vinker.github.io/sketch-agent/">project page</a>
-                        </div>
-                        <p>We introduce SketchAgent, a novel framework for generating sequential sketches from language prompts. By leveraging large language models and diffusion models, we achieve high-quality sketch generation that captures the essence of the input text.</p>
-                        <div class="contributions-toggle">
-                            Contributions
-                        </div>
-                        <div class="contributions-content">
-                            <div class="contributions-text">
-                                Worked on moving the LLM inference pipeline to a locally hosted version of Llama Vision 3.2 11B and Llama 3.2 90B. Learned about quantization, multi-gpu inference, and prompting techniques.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="research-item fade-in-section">
-                    <div class="research-image">
-                        <img src="images/app_creation.png" alt="LLM App Generation">
-                    </div>
-                    <div class="research-content-wrapper">
-                        <h3>Systematic Optimization of App Generation Few Shot Learning for Large Language Models Trained on Code</h3>
-                        <div class="research-venue">Research Science Institute, Regeneron Talent Search Top 300, Acta Scientific 2023</div>
-                        <div class="research-links">
-                            <a href="https://actascientific.com/ASCS/pdf/ASCS-05-0448.pdf">Paper</a>
-                            <a href="https://llmpaper.tiiny.site">Regeneron Talent Search version</a>
-                        </div>
-                        <p>We create an LLM in-context learning pipeline to systematically optimize (1) maximum token length of the prompt, (2) the mechanism of choosing few-shot examples, and (3) the ordering of few-shot examples to generate applications.</p>
-                        <div class="contributions-toggle">
-                            Contributions
-                        </div>
-                        <div class="contributions-content">
-                            <div class="contributions-text">
-                                Developed the p-mRMR algorithm and prompt creation framework, designed and wrote an evaluation suite of test applications and performed manual error evaluation of generated apps.
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="research-item fade-in-section">
-                    <div class="research-image">
-                        <img src="images/fundus1.png" alt="Glaucoma Research">
-                    </div>
-                    <div class="research-content-wrapper">
-                        <h3>Validating the Usage of Stable Diffusion Foundational Models on Generating Glaucoma Fundus Images in Low-Data Settings</h3>
-                        <div class="research-venue">Computer Vision Final Project</div>
-                        <p>We improve stable diffusion's ability to generate high-quality fundus images of the eye, specifically for glaucoma, by finetuning on an extremely small dataset of 170 images.</p>
-                        <div class="contributions-toggle">
-                            Contributions
-                        </div>
-                        <div class="contributions-content">
-                            <div class="contributions-text">
-                                Worked on designing the project/experiments, training the model, doing evals with resnet, and baselines (GANs)
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <section id="fun">
-        <div class="container">
-            <div class="section-header fade-in-section">
-                <h2>Fun Stuff</h2>
-            </div>
-            <div class="research-grid">
-                <div class="research-item fade-in-section">
+        <section id="fun">
+            <h2 class="section-title sans">Fun Stuff</h2>
+            <div class="fun-grid">
+                <div class="fun-item">
                     <h3>Music</h3>
-                    <div class="research-links">
-                        <a href="https://youtu.be/dYIOTRNfNPw?feature=shared">Until I Found You</a>
-                        <a href="https://youtu.be/28cnYUPvkE8?feature=shared">After the Journey</a>
-                        <a href="https://www.instagram.com/jasmine_s.wav/">Singing Account</a>
+                    <div class="fun-links">
+                        <a href="https://youtu.be/dYIOTRNfNPw?feature=shared">Until I Found You (Cover)</a>
+                        <a href="https://youtu.be/28cnYUPvkE8?feature=shared">After the Journey (Orig)</a>
+                        <a href="https://www.instagram.com/jasmine_s.wav/">Instagram</a>
                     </div>
                 </div>
-                <div class="research-item fade-in-section">
+                <div class="fun-item">
                     <h3>Writing</h3>
-                    <div class="research-links">
+                    <div class="fun-links">
                         <a href="https://docs.google.com/document/d/1Dj1WdJ7DWwaYeUvAaqp-dzbUK3Oqmg006THt9MCAj_Q/edit?usp=sharing">Thoughts in the Silent Night</a>
                         <a href="https://docs.google.com/document/d/19IPOXSQN7a7vaFwNrYfMTrv9oBMD5CFzXMKdGEC8aYI/edit?usp=sharing">Houston Rain</a>
-                        <a href="https://docs.google.com/document/d/16uQt5osBchymAD8EDuChpB3t1bHRnBTj3cJCqqnXU-A/edit?usp=sharing">Dreaming of Clocks and Rain</a>
                     </div>
                 </div>
-                <div class="research-item fade-in-section">
+                <div class="fun-item">
                     <h3>Games</h3>
-                    <div class="research-links">
+                    <div class="fun-links">
                         <a href="https://ssstudios.itch.io/the-collector">The Collector</a>
                         <a href="https://willyue.itch.io/a-quarky-tale">A Quarky Tale</a>
                     </div>
                 </div>
             </div>
+        </section>
+        
+        <div style="text-align:center; padding: 40px 0; color: #999; font-size: 0.8rem; font-family:'Inter',sans-serif;">
+            &copy; 2025 Jasmine Shone. 
         </div>
-    </section>
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-        // Intersection Observer for animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
+    </div>
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('animate');
-                }
-            });
-        }, observerOptions);
-
-        // Observe all fade-in sections
-        document.querySelectorAll('.fade-in-section, .work-item, .research-item, .awards-table').forEach(el => {
-            observer.observe(el);
-        });
-
-        // Staggered animation for work items and research items
-        const workItems = document.querySelectorAll('.work-item');
-        const researchItems = document.querySelectorAll('.research-item');
-        
-        workItems.forEach((item, index) => {
-            item.style.transitionDelay = `${index * 0.1}s`;
-        });
-        
-        researchItems.forEach((item, index) => {
-            item.style.transitionDelay = `${index * 0.1}s`;
-        });
-
-        // Smooth scroll for navigation
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Add scroll effect to navbar
-        window.addEventListener('scroll', () => {
-            const nav = document.querySelector('nav');
-            if (window.scrollY > 100) {
-                nav.style.background = 'rgba(255, 255, 255, 0.95)';
-                nav.style.boxShadow = '0 4px 6px -1px rgb(0 0 0 / 0.1)';
-            } else {
-                nav.style.background = 'rgba(255, 255, 255, 0.9)';
-                nav.style.boxShadow = 'none';
-            }
-        });
-
-        // Collapsible contributions toggle
-        document.querySelectorAll('.contributions-toggle').forEach(toggle => {
-            toggle.addEventListener('click', function() {
-                this.classList.toggle('active');
-                const content = this.nextElementSibling;
-                content.classList.toggle('active');
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggles = document.querySelectorAll('.contributions-toggle');
+            
+            toggles.forEach(toggle => {
+                toggle.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    const content = this.nextElementSibling;
+                    if (content.classList.contains('active')) {
+                        content.classList.remove('active');
+                    } else {
+                        content.classList.add('active');
+                    }
+                });
             });
         });
     </script>
