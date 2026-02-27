@@ -1,125 +1,105 @@
-# Beyond I-Con: Exploring New Dimensions of Distance Measures in Representation Learning
+# Beyond I-Con: A Roadmap for Representation Learning Loss Discovery
 
-*Jasmine Shone; project in collaboration with Shaden Alshammari, Mark Hamilton, Bill Freeman*  
-*MIT Computer Science*
+*Jasmine Shone\*, Zhening Li\*; in collaboration with Shaden Alshammari, Mark Hamilton, Bill Freeman*  
+*MIT CSAIL*  
+*\*Equal contribution*
 
 ## TLDR
-A previous paper, I-Con, created a framework which describes representation learning methods. In short, this framework states that most representation learning methods can be explained as aligning a data distribution with a learned distribution, and the exact formulations for each distribution lead to a specific loss. However, (1) the distance metric between the distributions always uses KL, which is known to have specific issues, (2) the similarity kernel which creates the data distribution by measuring how similar data samples are with each other can be changed in existing losses to create new ones (most losses use cosine similarity, but alternatives like euclidean distance are less explored). In this work, we show that trying different losses based on changing the distance metric and distance/similarity leads to state-of-the-art results. Additionally, we discover that KL divergence, while effective with angular similarity measures, may exhibit training instability when paired with distance-based similarity kernels.
+A previous paper, I-Con, created a framework showing that most representation learning methods can be explained as minimizing KL divergence between a data distribution and a learned distribution encoding similarities between data points. But why KL specifically? Properties of KL divergence such as asymmetry and unboundedness may create optimization challenges, and a KL-based loss may be misaligned with the true objective. In this work, we generalize I-Con by replacing KL with alternative f-divergences, systematically discovering novel loss functions. Our key findings: (1) Total Variation distance achieves state-of-the-art unsupervised clustering on ImageNet-1K; (2) Jensen-Shannon divergence outperforms KL for supervised contrastive learning on CIFAR-10; (3) bounded f-divergences resolve SNE's known crowding problem and produce better-separated dimensionality reduction visualizations. We also find evidence that KL's unbounded gradients cause training instability that bounded divergences avoid.
 
 ## Introduction
 
-Representation learning has seen rapid progress through contrastive, clustering, and generative objectives, yet most methods implicitly optimize a single dissimilarity measure—typically the Kullback–Leibler (KL) divergence. While the recent *Information Contrastive* (I-Con) framework elegantly unified over 23 representation losses under integrated KL minimization, KL is *metric-agnostic* and can distort latent geometry. We present **Beyond I-Con**, a divergence-agnostic generalization that faithfully marries information geometry with data geometry.
+Representation learning has seen rapid progress through contrastive, clustering, and generative objectives, yet most methods implicitly optimize a single dissimilarity measure—the Kullback–Leibler (KL) divergence. The recent *Information Contrastive* (I-Con) framework elegantly unified over 23 representation losses under integrated KL minimization. But if representation learning methods can be unified under minimizing the divergence between two distributions, what happens when we systematically explore alternative divergences?
 
-## The Problem with KL-Centric Approaches
+We present **Beyond I-Con**, a framework that enables systematic discovery of novel loss functions by exploring alternative statistical divergences in place of KL.
 
-Learning representations that simultaneously capture semantic similarity and respect the underlying geometry of data manifolds is a long-standing goal in machine learning. Recent self-supervised paradigms—contrastive, clustering-based, and generative—can all be interpreted as matching conditional neighbourhood distributions. The Information Contrastive (I-Con) framework formalized this view through integrated KL divergence:
+## Background: The I-Con Framework
 
-![equation 1](images/eqicon1.png)
+The I-Con framework unifies representation learning methods by framing them as minimizing the average KL divergence between two conditional "neighborhood distributions" that define transition probabilities between data points. A fixed "supervisory" distribution p(j|i) is derived from the dataset, and a learnable distribution q(j|i) is computed from similarities between learned features. The I-Con loss is:
 
-However, KL measures mismatch *in probability space* and is oblivious to Euclidean or geodesic distances between samples. Two disjoint clusters swapped in latent space can have low KL divergence yet be geometrically disastrous for downstream tasks.
+$$\mathcal{L}_{\text{I-Con}} = \mathbb{E}_{i \sim p(i)} \left[ D_{KL}\left( p(\cdot|i) \| q(\cdot|i) \right) \right]$$
 
-## Beyond I-Con: A Divergence-Agnostic Framework
+By varying how p is constructed from the dataset and how q is defined in terms of feature similarities, this single formulation reproduces the loss functions of many existing representation learning methods.
 
-We ask: *Can a single, geometry-aware objective subsume existing SSL losses while guaranteeing meaningful latent distances?* 
+## Beyond I-Con: Replacing KL with Alternative Divergences
 
-Our key insight is that I-Con represents just one point in a much larger space of possible divergence measures. Let $\mathcal{D}$ be any positive definite divergence. We define our general objective as:
+Our key insight is simple: replace the KL divergence with any positive-definite divergence D:
 
-![equation 2](images/eqicon2.png)
+$$\mathcal{L}_{\text{Beyond I-Con}} = \mathbb{E}_{i \sim p(i)} \left[ D\left( p(\cdot|i) \| q(\cdot|i) \right) \right]$$
 
-This simple substitution opens up a rich family of objectives. Choosing different values of $\mathcal{D}$ instantiates familiar objectives like InfoNCE (Jensen-Shannon divergence) and triplet loss (Total Variation).
+We focus on **f-divergences** because they are most directly comparable to KL as measures of distance between distributions. Specifically, we explore:
 
-### Divergence Families We Explore
+- **KL Divergence**: The standard choice; asymmetric and unbounded.
+- **Total Variation (TV)**: Based on the L₁ norm of probability differences; bounded between 0 and 1.
+- **Jensen-Shannon Divergence (JSD)**: A symmetric, bounded variant that directly remedies KL's asymmetry and unboundedness.
+- **Hellinger Distance**: Another bounded, symmetric f-divergence.
 
-**f-divergences**: Given convex $f$ with $f(1)=0$, these include KL, Jensen–Shannon (JSD), Total Variation (TV), and Hellinger distances. Each captures different aspects of distributional mismatch.
-
-**Integral Probability Metrics (IPMs)**: These include Maximum Mean Discrepancy, which are inherently geometry-aware.
-
-**Bregman Divergences**: For strictly convex $\psi$, these include Euclidean distance and Itakura–Saito divergence as special cases.
-
-
-## Exploring New Loss Function Combinations
-
-An important observation emerged from analyzing how different divergences interact with different similarity measures in the embedding space. When we systematically vary both the divergence measure (KL, Total Variation, Hellinger, etc.) and the similarity measure (angular vs. distance-based), we discover new loss function combinations that were previously unexplored.
-
-**Angular-based methods**: These utilize dot product or cosine similarity, learning representations where similar features have high cosine similarity (small angles between vectors). This approach is common in methods like SimCLR and InfoNCE.
-
-**Distance-based methods**: These rely on Euclidean distance in the embedding space, pulling similar instances closer together while pushing dissimilar instances apart using distance metrics. This formulation creates natural clustering structures where similar samples are geometrically proximate.
-
-By exploring the cross-product of different divergences with different similarity measures, we uncover loss functions that had not been systematically studied. Some of these combinations, particularly Total Variation with distance-based similarity, achieve strong empirical performance.
+Some of these divergences—such as JSD—directly address known weaknesses of KL like asymmetry and unboundedness, making them theoretically motivated alternatives.
 
 ## Experimental Results
 
-We conducted extensive experiments across multiple domains: unsupervised clustering, supervised contrastive learning, and dimensionality reduction.
+We evaluated these divergences across three core representation learning tasks: unsupervised clustering, supervised contrastive learning, and dimensionality reduction.
 
 ### Unsupervised Clustering on ImageNet-1K
 
-Using DINO ViT embeddings, we evaluated different divergences and observed competitive performance from Total Variation:
+We modified the Pointwise Mutual Information (PMI) clustering algorithm to use different divergences, following the same training setup as the I-Con paper: clustering DINO ViT embeddings on ImageNet-1K by training a linear classifier for 30 epochs with batch size 4096, learning rate 1×10⁻³, and the Adam optimizer.
 
 | Method | DiNO ViT-S/14 | DiNO ViT-B/14 | DiNO ViT-L/14 |
 |--------|---------------|---------------|---------------|
 | k-Means | 51.84 | 52.26 | 53.36 |
-| Debiased InfoNCE (Previous SOTA) | **57.8** | 64.75 | 67.52 |
-| **Total Variation (Ours)** | 55.90 | **65.13** | **68.40** |
+| TEMI | 56.84 | 58.62 | — |
+| Debiased InfoNCE (Previous SOTA) | **57.8** ± 0.26 | 64.75 ± 0.18 | 67.52 ± 0.28 |
+| JSD | 53.50 | 63.80 | 66.60 |
+| **Total Variation (Ours)** | 55.90 | **65.13** ± 0.13 | **68.40** ± 0.29 |
+| Hellinger | 54.90 | 63.80 | 67.85 |
 
-### Supervised Contrastive Learning
+*Hungarian Accuracy on ImageNet-1K clustering.*
 
-Our experiments on CIFAR-10 explored both angular-based and distance-based formulations across different divergences. We observe interesting patterns in how different divergences perform depending on the underlying similarity measure:
+Total Variation outperforms the previous state-of-the-art on ViT-B/14 and ViT-L/14 embeddings.
 
-| Divergence | Angular-based | Distance-based |
-|------------|---------------|----------------|
-| KL | 92.72 / 91.33 | does not converge / does not converge |
-| Total Variation | 85.04 / 81.80 | **96.41** / **97.33** |
-| Hellinger | 89.16 / 87.12 | 92.50 / 91.93 |
-| Jensen-Shannon | 86.69 / 84.03 | 91.83 / 90.99 |
+### Supervised Contrastive Learning on CIFAR-10
 
-*Results shown as Linear Probing / KNN accuracy percentages. All models are trained for 150 epochs with a ResNet-50 architecture.*
+We trained ResNet-50 models with supervised contrastive learning on CIFAR-10, using a Euclidean distance metric on features. Models were trained for 150 epochs with batch size 2048 and learning rate 1×10⁻³, and we systematically varied the divergence measure. Classification was performed by training a linear probe or applying k-nearest neighbors.
 
-Notably, while KL divergence performs well with angular similarity measures, Total Variation achieves the highest performance when combined with distance-based measures. However, these final performance numbers only tell part of the story—a deeper analysis reveals differences in training dynamics across divergence-similarity combinations.
+| Divergence | Linear Probe Acc. | k-NN (k=7) Acc. |
+|------------|-------------------|------------------|
+| KL | 90.03 ± 0.14 | 89.61 ± 0.13 |
+| TV | 83.23 ± 0.18 | 82.95 ± 0.16 |
+| Hellinger | 90.47 ± 0.08 | 90.40 ± 0.09 |
+| **JSD** | **90.84** ± 0.11 | **90.62** ± 0.11 |
 
-### Training Instability in Certain Divergence/Similarity Combinations
+*Downstream classification accuracy from supervised contrastive features on CIFAR-10. Errors are standard errors of the mean over 5 seeds.*
 
-Through monitoring training dynamics, we discovered that certain divergence-similarity combinations suffer from optimization instability. Most strikingly, while vanilla supcon (KL + cosine similarity kernel) trains in a stable manner, KL divergence paired with distance-based similarity measures exhibits training collapse despite initially promising performance.
+Both Hellinger and Jensen-Shannon divergence outperform vanilla supervised contrastive learning (which uses KL), with JSD achieving the best performance.
 
-![training instability](images/instability.png)
+### Dimensionality Reduction on CIFAR-10
 
-*Training dynamics comparison: Total Variation + Distance (green) maintains stable learning throughout training, while KL Divergence + Distance (red) suffers collapse. Though this example shows collapse around step 1200, we observed similar patterns across multiple runs, though timing varied.*
+We ran SNE with a CNN backbone on CIFAR-10 using different divergences. The qualitative differences are striking: while SNE with KL produces highly overlapping clusters, the other divergences achieve much cleaner class separation. This directly addresses SNE's well-known "crowding problem."
 
-The training curves reveal that KL divergence with distance-based similarity initially learns effectively, often tracking the performance of Total Variation (the best method when utilizing a distance-based similarity kernel) and reaching validation accuracies near 80%. However, the optimization becomes unstable at unpredictable points during training, leading to crashes that drive performance down to 10-20% accuracy. 
+## Analysis and Discussion
 
-This instability may be intrinsic to the divergence-similarity combination. Across multiple independent runs, we observe collapses for KL divergence with distance-based similarity, though the exact timing varies. In contrast, Total Variation with distance-based similarity maintains stable training throughout, smoothly converging to high performance without any observed instability across all experimental runs.
+### Why Does KL Underperform?
 
-## Key Insights and Implications
+Across all three tasks—unsupervised clustering, supervised contrastive learning, and dimensionality reduction—a non-KL divergence outperforms KL. We hypothesize this stems from KL's unbounded penalty: when q(j|i) → 0, KL diverges to infinity. This means the loss overly penalizes placing dissimilar points far apart in the feature space, which causes different clusters or classes to crowd together and start overlapping.
 
-### Training Stability as a Critical Design Consideration
+This is precisely the well-known crowding problem in dimensionality reduction. When mapping clusters from a high-dimensional space to a lower-dimensional one, maintaining minimum separation distances forces some cluster pairs to become very distant (as established by packing arguments from Rogers, 1964). KL heavily penalizes these cases where q(j|i) ≪ p(j|i). The optimization responds by pulling distant clusters closer together—creating overcrowding.
 
-Our analysis reveals that training stability varies across divergence-similarity combinations, with some exhibiting unpredictable failure modes. Specifically, the pairing of KL with distance-based similarity in supervised contrastive learning appears to lead to training instability-- which could be a possible explanation for why there are more existing methods using a cosine-similarity kernel as shown in the I-Con table as KL is the base distance kernel used in loss formulations.
+TV, JSD, and Hellinger all remain bounded as q(j|i) → 0, so they incur a much lower penalty for far-apart clusters, resolving the crowding issue. Our SNE visualizations confirm this: bounded divergences produce well-separated clusters while KL does not.
 
-### Empirical Patterns in Divergence-Similarity Combinations
+### Gradient Instability with KL
 
-Our results reveal that different divergence measures exhibit varying effectiveness depending on the chosen similarity measure. The performance differences across these combinations, coupled with their distinct training dynamics, suggest that the choice of divergence cannot be made independently of the similarity measure used in the loss function.
-
-### Total Variation's Strong Performance with Distance-based Measures
-
-We observe that Total Variation distance performs particularly well when combined with distance-based similarity measures across multiple tasks. Beyond its strong final performance, Total Variation demonstrates superior optimization stability compared to KL divergence. This may be related to its $L_1$-norm properties, which provide a more balanced treatment of probability differences and more well-behaved gradients during training.
-
-
+We also observe evidence that KL-based losses produce unstable gradients during training, consistent with previous findings in other domains. Our gradient norm plots during SNE training show large spikes when using KL, especially near the beginning of training. In contrast, bounded divergences (TV, Hellinger, JSD) exhibit more stable gradient behavior throughout training across all network layers.
 
 ## Limitations and Future Directions
 
-While our framework successfully unifies diverse representation learning objectives, several limitations warrant discussion. 
+While our framework successfully demonstrates that alternative divergences can outperform KL, several avenues remain open.
 
-Firstly, we did not thoroughly test the Wasserstein distance primarily because of computational overhead. Future work may continue along this direction because of theoretical reasons for why Wasserstein is superior to KL, such as was analyzed by the WGAN paper.
+We focused on f-divergences as the most natural generalization. Other divergence families—such as Wasserstein distance or integral probability metrics—remain unexplored and could offer additional benefits, particularly in terms of geometry-awareness, though computational overhead is a practical concern.
 
-The theoretical understanding of why certain divergences exhibit training instability in specific formulations remains incomplete. A deeper analysis of the optimization landscape, gradient dynamics, and convergence properties under different divergence choices would strengthen the framework and potentially suggest modifications to improve stability.
+The theoretical understanding of *why* specific divergences perform best for specific tasks remains incomplete. A deeper analysis of optimization landscapes and gradient dynamics across different divergence choices would strengthen the framework.
 
-Finally, while we created one new loss for Supervised Contrastive Learning in particular by swapping out the cosine similarity kernel for the euclidean kernel, this can be done for any loss which exists for which its counterpart using the other similarity kernel doesn't exist, such as SimCLR. 
+Finally, the Beyond I-Con framework can be applied to any existing loss function captured by I-Con. We demonstrated improvements on PMI clustering, supervised contrastive learning, and SNE, but the same divergence-swapping approach could be applied to methods like SimCLR, CLIP, and others.
 
 ## Conclusion
 
-The Beyond I-Con framework challenges the field's implicit assumption that KL divergence is the natural choice for representation learning. By demonstrating that geometry-aware divergences can significantly outperform KL-based methods—and revealing optimization challenges with certain combinations—we open new avenues for developing more principled approaches that explicitly account for both the underlying data manifold structure and training dynamics.
-
-Our systematic exploration of divergence-similarity measure combinations provides a useful framework for analyzing existing methods and discovering new ones. This approach helps researchers understand how these design choices interact and may guide the selection of appropriate combinations for specific applications, with particular attention to optimization stability.
-
-The future of representation learning lies not in finding the single "best" divergence, but in developing principled frameworks for selecting divergences that align with the geometric properties of the data, the specific requirements of the downstream task, and the practical constraints of reliable optimization. The Beyond I-Con framework provides the theoretical foundation for this endeavor, while our empirical results—including the discovery of training instability patterns—demonstrate its practical importance.
-
-As the field continues to grapple with more complex data modalities and geometric structures, we anticipate that divergence-aware approaches will become increasingly important. Our framework provides both the theoretical tools and empirical evidence needed to guide this evolution toward more geometry-aware and optimization-robust representation learning methods.
+Beyond I-Con challenges the default reliance on KL divergence in representation learning by showing that alternative f-divergences can yield superior performance across unsupervised clustering, supervised contrastive learning, and dimensionality reduction. By extending the I-Con framework with a new dimension—the choice of divergence—we provide a systematic approach for discovering novel loss functions. Our results highlight that this design choice matters and should be carefully considered rather than defaulted to KL.
